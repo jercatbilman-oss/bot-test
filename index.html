@@ -1289,6 +1289,7 @@
             let executionPrice = state.currentPrice;
             let netProfit = 0;
             let actualFees = 0;
+            let tokenAddress = null; // Déclaré ici pour être accessible partout
             
             // MODE RÉEL - PANCAKESWAP
             if (state.tradingMode === 'real' && state.wallet) {
@@ -1314,7 +1315,7 @@
                         
                         debugLog('🔄 Achat avec USDT sur PancakeSwap...', 'warning');
                         
-                        const tokenAddress = getTokenAddress(state.selectedCrypto);
+                        tokenAddress = getTokenAddress(state.selectedCrypto);
                         const amountIn = ethers.utils.parseUnits(tradeAmount.toFixed(2), usdtData.decimals);
                         
                         const usdtContract = new ethers.Contract(
@@ -1370,6 +1371,34 @@
                         const receipt = await tx.wait();
                         debugLog(`✅ Confirmé! Gas: ${receipt.gasUsed.toString()}`, 'success');
                         
+                        // RÉCUPÉRER LE MONTANT DE TOKENS REÇU DEPUIS LES LOGS
+                        try {
+                            // Le dernier Transfer event contient le montant reçu
+                            const transferEvent = receipt.logs.find(log => 
+                                log.topics[0] === '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef' // Transfer signature
+                                && log.address.toLowerCase() === tokenAddress.toLowerCase()
+                            );
+                            
+                            if (transferEvent) {
+                                const tokenAmount = ethers.BigNumber.from(transferEvent.data);
+                                state.tokensBought = parseFloat(ethers.utils.formatEther(tokenAmount));
+                                debugLog(`💎 Tokens reçus (depuis event): ${state.tokensBought.toFixed(6)}`, 'success');
+                            } else {
+                                // Fallback: lire le solde
+                                const tokenContract = new ethers.Contract(
+                                    tokenAddress,
+                                    ['function balanceOf(address) view returns (uint256)'],
+                                    state.provider
+                                );
+                                const balance = await tokenContract.balanceOf(state.account);
+                                state.tokensBought = parseFloat(ethers.utils.formatEther(balance));
+                                debugLog(`💎 Tokens reçus (depuis balance): ${state.tokensBought.toFixed(6)}`, 'success');
+                            }
+                        } catch (err) {
+                            debugLog(`⚠️ Erreur lecture tokens: ${err.message}`, 'warning');
+                            state.tokensBought = tradeAmount / executionPrice;
+                        }
+                        
                         // Calculer les frais de gas (support EIP-1559)
                         let gasCost = 0;
                         if (receipt.effectiveGasPrice) {
@@ -1388,21 +1417,6 @@
                         actualFees = (tradeAmount * 0.0025) + (gasCost * state.currentPrice / 100);
                         executionPrice = state.currentPrice;
                         
-                        // IMPORTANT: Récupérer le solde réel de tokens après le swap
-                        try {
-                            const tokenContract = new ethers.Contract(
-                                tokenAddress,
-                                ['function balanceOf(address) view returns (uint256)'],
-                                state.provider
-                            );
-                            const balance = await tokenContract.balanceOf(state.account);
-                            state.tokensBought = parseFloat(ethers.utils.formatEther(balance));
-                            debugLog(`💎 Tokens reçus: ${state.tokensBought.toFixed(6)} tokens`, 'success');
-                        } catch (err) {
-                            debugLog(`⚠️ Impossible de lire le solde, estimation: ${(tradeAmount / executionPrice).toFixed(6)}`, 'warning');
-                            state.tokensBought = tradeAmount / executionPrice;
-                        }
-                        
                         // IMPORTANT: Déduire le montant du capital
                         state.tradingCapital -= tradeAmount;
                         debugLog(`💰 Capital après achat: ${state.tradingCapital.toFixed(2)} USDT`, 'info');
@@ -1410,7 +1424,7 @@
                     } else {
                         debugLog('🔄 Vente Token → USDT...', 'warning');
                         
-                        const tokenAddress = getTokenAddress(state.selectedCrypto);
+                        tokenAddress = getTokenAddress(state.selectedCrypto); // Pas de const ici!
                         
                         // CORRECTION CRITIQUE: Utiliser le montant réel de tokens acheté
                         let tokenAmount = state.tokensBought || (state.positionAmount / state.lastBuyPrice);
