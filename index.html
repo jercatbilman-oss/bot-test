@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -407,7 +406,8 @@
         const TOKEN_ADDRESSES = {
             'BTCUSDT': '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c',
             'ETHUSDT': '0x2170Ed0880ac9A755fd29B2688956BD959F933F8',
-            'BNBUSDT': WBNB
+            'BNBUSDT': WBNB,
+            'SOLUSDT': '0x570A5D26f7765Ecb712C0924E4De545B89fD43dF'
         };
         
         function getTokenAddress(symbol) {
@@ -508,11 +508,13 @@
             botRunning: false,
             trades: [],
             portfolio: { profit: 0, wins: 0, losses: 0, bestTrade: 0, worstTrade: 0 },
+            tokenStats: {}, // Stats par token: {BTCUSDT: {trades: 5, profit: 10, wins: 3, losses: 2}}
             indicators: { ema9: 0, ema21: 0, ema50: 0, rsi: 50, macd: 0, macdHist: 0, bbUpper: 0, bbLower: 0, atr: 0, volume: 0, volumeAvg: 0 },
             signals: { trend: false, rsi: false, macd: false, bollinger: false, volume: false, volatility: false },
             currentPosition: null,
             lastBuyPrice: 0,
             positionAmount: 0,
+            tokensBought: 0, // Montant réel de tokens acheté
             entryFees: 0,
             lastMacdHist: 0,
             isTrading: false,
@@ -739,9 +741,10 @@
 
         function loadCryptos() {
             const cryptos = [
-                { symbol: 'BTCUSDT', name: 'BTC' },
-                { symbol: 'ETHUSDT', name: 'ETH' },
-                { symbol: 'BNBUSDT', name: 'BNB' }
+                { symbol: 'BTCUSDT', name: '₿ BTC' },
+                { symbol: 'ETHUSDT', name: 'Ξ ETH' },
+                { symbol: 'BNBUSDT', name: '◆ BNB' },
+                { symbol: 'SOLUSDT', name: '◎ SOL' }
             ];
             document.getElementById('cryptoSelect').innerHTML = cryptos.map(c => 
                 `<option value="${c.symbol}">${c.name}</option>`
@@ -1385,6 +1388,21 @@
                         actualFees = (tradeAmount * 0.0025) + (gasCost * state.currentPrice / 100);
                         executionPrice = state.currentPrice;
                         
+                        // IMPORTANT: Récupérer le solde réel de tokens après le swap
+                        try {
+                            const tokenContract = new ethers.Contract(
+                                tokenAddress,
+                                ['function balanceOf(address) view returns (uint256)'],
+                                state.provider
+                            );
+                            const balance = await tokenContract.balanceOf(state.account);
+                            state.tokensBought = parseFloat(ethers.utils.formatEther(balance));
+                            debugLog(`💎 Tokens reçus: ${state.tokensBought.toFixed(6)} tokens`, 'success');
+                        } catch (err) {
+                            debugLog(`⚠️ Impossible de lire le solde, estimation: ${(tradeAmount / executionPrice).toFixed(6)}`, 'warning');
+                            state.tokensBought = tradeAmount / executionPrice;
+                        }
+                        
                         // IMPORTANT: Déduire le montant du capital
                         state.tradingCapital -= tradeAmount;
                         debugLog(`💰 Capital après achat: ${state.tradingCapital.toFixed(2)} USDT`, 'info');
@@ -1393,7 +1411,12 @@
                         debugLog('🔄 Vente Token → USDT...', 'warning');
                         
                         const tokenAddress = getTokenAddress(state.selectedCrypto);
-                        const tokenAmount = state.positionAmount / state.lastBuyPrice;
+                        
+                        // CORRECTION CRITIQUE: Utiliser le montant réel de tokens acheté
+                        let tokenAmount = state.tokensBought || (state.positionAmount / state.lastBuyPrice);
+                        
+                        debugLog(`💎 Vente de ${tokenAmount.toFixed(6)} tokens`, 'info');
+                        
                         const amountIn = ethers.utils.parseUnits(tokenAmount.toFixed(8), 18);
                         
                         const tokenContract = new ethers.Contract(
@@ -1501,7 +1524,8 @@
             if (tradeType === 'BUY') {
                 state.currentPosition = 'BUY';
                 state.lastBuyPrice = executionPrice;
-                state.positionAmount = tradeAmount - actualFees;
+                state.positionAmount = tradeAmount - actualFees; // En USDT
+                state.tokensBought = 0; // Sera calculé après le swap
                 state.entryFees = actualFees;
                 
                 debugLog(`📈 POSITION OUVERTE`, 'success');
@@ -1523,6 +1547,7 @@
                 debugLog(`💰 Capital total: ${state.tradingCapital.toFixed(2)} USDT`, 'info');
                 
                 state.currentPosition = null;
+                state.tokensBought = 0;
                 state.entryFees = 0;
                 
                 if (netProfit > 0) state.portfolio.wins++;
@@ -1539,6 +1564,7 @@
                 id: Date.now(),
                 time: new Date().toLocaleTimeString('fr-FR'),
                 type: tradeType,
+                crypto: state.selectedCrypto, // Ajouter le crypto tradé
                 amount: tradeAmount.toFixed(2),
                 price: executionPrice.toFixed(2),
                 profit: netProfit.toFixed(2),
@@ -1550,6 +1576,18 @@
             
             state.trades.unshift(newTrade);
             state.trades = state.trades.slice(0, 20);
+            
+            // STATS PAR TOKEN
+            if (tradeType === 'SELL') {
+                const crypto = state.selectedCrypto;
+                if (!state.tokenStats[crypto]) {
+                    state.tokenStats[crypto] = { trades: 0, profit: 0, wins: 0, losses: 0 };
+                }
+                state.tokenStats[crypto].trades++;
+                state.tokenStats[crypto].profit += netProfit;
+                if (netProfit > 0) state.tokenStats[crypto].wins++;
+                else state.tokenStats[crypto].losses++;
+            }
             
             debugLog(`✅ Trade ajouté à l'historique (ID: ${newTrade.id})`, 'success');
             debugLog(`📊 Total trades: ${state.trades.length}`, 'info');
@@ -1567,27 +1605,30 @@
 
         function renderTrades() {
             if (state.trades.length === 0) return;
-            document.getElementById('tradesContainer').innerHTML = state.trades.map(t => `
+            document.getElementById('tradesContainer').innerHTML = state.trades.map(t => {
+                const cryptoName = t.crypto ? t.crypto.replace('USDT', '') : 'Unknown';
+                return `
                 <div class="flex justify-between p-3 glass-effect rounded-lg mb-2 border-l-4 ${t.type === 'BUY' ? 'border-green-500' : 'border-red-500'}">
                     <div>
                         <div class="flex items-center gap-2">
                             <span class="${t.type === 'BUY' ? 'text-green-400' : 'text-red-400'} text-xl">${t.type === 'BUY' ? '🟢' : '🔴'}</span>
                             <span class="font-bold">${t.type}</span>
+                            <span class="text-xs bg-blue-400/20 px-2 py-1 rounded font-bold">${cryptoName}</span>
                             <span class="text-xs bg-purple-400/20 px-2 py-1 rounded">${t.reason}</span>
                         </div>
                         <p class="text-xs text-gray-400 mt-1">${t.time}</p>
                     </div>
                     <div class="text-right">
-                        <p class="text-sm font-mono">${t.price}</p>
+                        <p class="text-sm font-mono">$${t.price}</p>
                         ${t.type === 'SELL' ? `
                             <p class="text-lg font-bold ${parseFloat(t.profit) >= 0 ? 'text-green-400' : 'text-red-400'}">
-                                ${parseFloat(t.profit) >= 0 ? '+' : ''}${t.profit}
+                                ${parseFloat(t.profit) >= 0 ? '+' : ''}$${t.profit}
                             </p>
-                            <p class="text-xs text-gray-400">Frais: ${t.fees}</p>
-                        ` : '<p class="text-sm text-gray-400">Ouvert</p>'}
+                            <p class="text-xs text-gray-400">Frais: $${t.fees}</p>
+                        ` : '<p class="text-sm text-green-400">Ouvert</p>'}
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         function updateUI() {
