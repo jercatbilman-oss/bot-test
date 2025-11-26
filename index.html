@@ -272,12 +272,12 @@
                             <input type="number" id="tradePercent" value="10" min="1" max="100" class="w-full glass-effect rounded-lg px-3 py-2 text-sm">
                         </div>
                         <div>
-                            <label class="block text-xs text-gray-400 mb-1">TP Mult</label>
-                            <input type="number" id="tpMultiplier" value="3" min="1.5" max="5" step="0.25" class="w-full glass-effect rounded-lg px-3 py-2 text-sm">
+                            <label class="block text-xs text-gray-400 mb-1">TP % (après frais)</label>
+                            <input type="number" id="tpMultiplier" value="3" min="1" max="10" step="0.5" class="w-full glass-effect rounded-lg px-3 py-2 text-sm">
                         </div>
                         <div>
-                            <label class="block text-xs text-gray-400 mb-1">SL Mult</label>
-                            <input type="number" id="slMultiplier" value="1.5" min="0.5" max="3" step="0.25" class="w-full glass-effect rounded-lg px-3 py-2 text-sm">
+                            <label class="block text-xs text-gray-400 mb-1">SL % (après frais)</label>
+                            <input type="number" id="slMultiplier" value="1.5" min="0.5" max="5" step="0.25" class="w-full glass-effect rounded-lg px-3 py-2 text-sm">
                         </div>
                         <div>
                             <label class="block text-xs text-gray-400 mb-1">Score min (%)</label>
@@ -1000,22 +1000,34 @@
                 }
                 return { signal: null, score: 0 };
             } else {
+                // CALCUL DU PROFIT RÉEL (prix actuel vs prix d'achat)
                 const profitPct = ((state.currentPrice - state.lastBuyPrice) / state.lastBuyPrice) * 100;
-                const atrPct = (state.indicators.atr / state.lastBuyPrice) * 100;
-                const tpMult = parseFloat(document.getElementById('tpMultiplier').value);
-                const slMult = parseFloat(document.getElementById('slMultiplier').value);
                 
-                const dynamicTP = atrPct * tpMult;
-                const dynamicSL = -atrPct * slMult;
+                // TP/SL FIXES (valeurs par défaut de l'interface)
+                const tpMult = parseFloat(document.getElementById('tpMultiplier').value); // 3 par défaut
+                const slMult = parseFloat(document.getElementById('slMultiplier').value); // 1.5 par défaut
                 
+                // FRAIS ESTIMÉS (0.25% swap × 2 + gas)
+                // Pour un trade de 10 USDT: 0.025 + 0.025 + 0.30 gas ≈ 0.35 USDT = 3.5%
+                // Donc on ajoute ~0.5% de marge pour les frais
+                const feesMargin = 0.5; // 0.5% de marge pour frais réseau
+                
+                // TP = 3% + 0.5% frais = 3.5% minimum
+                const dynamicTP = tpMult + feesMargin;
+                // SL = -1.5% - 0.5% frais = -2% maximum
+                const dynamicSL = -(slMult + feesMargin);
+                
+                // STOP LOSS : Vendre si perte >= 1.5% + frais
                 if (profitPct <= dynamicSL) {
                     return { signal: 'SELL', score: 100, reason: `SL ${dynamicSL.toFixed(2)}%` };
                 }
                 
+                // TAKE PROFIT : Vendre si profit >= 3% + frais
                 if (profitPct >= dynamicTP) {
                     return { signal: 'SELL', score: 100, reason: `TP +${dynamicTP.toFixed(2)}%` };
                 }
                 
+                // SÉCURITÉ RSI : Vendre si RSI très haut (surachat) et profit > 0.5%
                 if (state.indicators.rsi > 75 && profitPct > 0.5) {
                     return { signal: 'SELL', score: 100, reason: `RSI:${state.indicators.rsi.toFixed(0)}` };
                 }
