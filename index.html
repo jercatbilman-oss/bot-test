@@ -1159,9 +1159,27 @@
                         const receipt = await tx.wait();
                         debugLog(`✅ Confirmé! Gas: ${receipt.gasUsed.toString()}`, 'success');
                         
-                        const gasCost = parseFloat(ethers.utils.formatEther(receipt.gasUsed.mul(tx.gasPrice)));
-                        actualFees = (tradeAmount * 0.0025) + gasCost;
+                        // Calculer les frais de gas (support EIP-1559)
+                        let gasCost = 0;
+                        if (receipt.effectiveGasPrice) {
+                            // EIP-1559 transaction
+                            gasCost = parseFloat(ethers.utils.formatEther(receipt.gasUsed.mul(receipt.effectiveGasPrice)));
+                        } else if (tx.gasPrice) {
+                            // Legacy transaction
+                            gasCost = parseFloat(ethers.utils.formatEther(receipt.gasUsed.mul(tx.gasPrice)));
+                        } else {
+                            // Fallback: estimer à 5 gwei
+                            const estimatedGasPrice = ethers.utils.parseUnits('5', 'gwei');
+                            gasCost = parseFloat(ethers.utils.formatEther(receipt.gasUsed.mul(estimatedGasPrice)));
+                        }
+                        debugLog(`💸 Frais gas: ${gasCost.toFixed(6)} BNB`, 'info');
+                        
+                        actualFees = (tradeAmount * 0.0025) + (gasCost * state.currentPrice / 100);
                         executionPrice = state.currentPrice;
+                        
+                        // IMPORTANT: Déduire le montant du capital
+                        state.tradingCapital -= tradeAmount;
+                        debugLog(`💰 Capital après achat: ${state.tradingCapital.toFixed(2)} USDT`, 'info');
                         
                     } else {
                         debugLog('🔄 Vente Token → USDT...', 'warning');
@@ -1223,8 +1241,22 @@
                         const receipt = await tx.wait();
                         debugLog(`✅ Vendu! Gas: ${receipt.gasUsed.toString()}`, 'success');
                         
-                        const gasCost = parseFloat(ethers.utils.formatEther(receipt.gasUsed.mul(tx.gasPrice)));
-                        actualFees = (tradeAmount * 0.0025) + gasCost;
+                        // Calculer les frais de gas (support EIP-1559)
+                        let gasCost = 0;
+                        if (receipt.effectiveGasPrice) {
+                            // EIP-1559 transaction
+                            gasCost = parseFloat(ethers.utils.formatEther(receipt.gasUsed.mul(receipt.effectiveGasPrice)));
+                        } else if (tx.gasPrice) {
+                            // Legacy transaction
+                            gasCost = parseFloat(ethers.utils.formatEther(receipt.gasUsed.mul(tx.gasPrice)));
+                        } else {
+                            // Fallback: estimer à 5 gwei
+                            const estimatedGasPrice = ethers.utils.parseUnits('5', 'gwei');
+                            gasCost = parseFloat(ethers.utils.formatEther(receipt.gasUsed.mul(estimatedGasPrice)));
+                        }
+                        debugLog(`💸 Frais gas: ${gasCost.toFixed(6)} BNB`, 'info');
+                        
+                        actualFees = (tradeAmount * 0.0025) + (gasCost * state.currentPrice / 100); // Convertir BNB en USDT approx
                         executionPrice = state.currentPrice;
                     }
                 } catch (error) {
@@ -1232,6 +1264,8 @@
                     state.isTrading = false;
                     return;
                 }
+                
+                debugLog(`✅ Swap terminé! Mode: RÉEL`, 'success');
             } else {
                 // MODE SIMULATION
                 if (tradeType === 'BUY') {
@@ -1292,6 +1326,7 @@
                 state.portfolio.profit += netProfit;
             }
             
+            debugLog(`📝 Création du trade dans l'historique...`, 'info');
             const newTrade = {
                 id: Date.now(),
                 time: new Date().toLocaleTimeString('fr-FR'),
@@ -1308,13 +1343,18 @@
             state.trades.unshift(newTrade);
             state.trades = state.trades.slice(0, 20);
             
+            debugLog(`✅ Trade ajouté à l'historique (ID: ${newTrade.id})`, 'success');
+            debugLog(`📊 Total trades: ${state.trades.length}`, 'info');
+            
             state.isTrading = false;
             state.lastTradeTime = Date.now();
             
+            debugLog(`🎨 Mise à jour de l'interface...`, 'info');
             renderTrades();
             updateChart();
             updateUI();
             saveState();
+            debugLog(`✅ Interface mise à jour!`, 'success');
         }
 
         function renderTrades() {
