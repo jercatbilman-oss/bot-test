@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -852,6 +853,14 @@
 
         function connectWebSocket() {
             if (ws) ws.close();
+            
+            // Si token custom, utiliser polling PancakeSwap au lieu de WebSocket Binance
+            if (state.selectedCrypto.startsWith('CUSTOM_')) {
+                debugLog('📊 Token custom - Prix via PancakeSwap', 'info');
+                startPancakeSwapPolling();
+                return;
+            }
+            
             const symbol = state.selectedCrypto.toLowerCase();
             ws = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol}@ticker`);
             
@@ -873,6 +882,55 @@
                 
                 document.getElementById('currentPrice').textContent = state.currentPrice.toFixed(2);
             };
+        }
+
+        let pancakePolling = null;
+        
+        async function startPancakeSwapPolling() {
+            if (pancakePolling) clearInterval(pancakePolling);
+            
+            debugLog('🥞 Démarrage polling PancakeSwap...', 'info');
+            
+            const fetchPrice = async () => {
+                try {
+                    if (!state.customToken || !state.provider) return;
+                    
+                    const router = new ethers.Contract(
+                        PANCAKESWAP_ROUTER,
+                        ['function getAmountsOut(uint amountIn, address[] memory path) view returns (uint[] memory amounts)'],
+                        state.provider
+                    );
+                    
+                    // 1 token → combien de USDT ?
+                    const amountIn = ethers.utils.parseUnits('1', state.customToken.decimals);
+                    const path = [state.customToken.address, WBNB, USDT];
+                    
+                    const amounts = await router.getAmountsOut(amountIn, path);
+                    const priceInUSDT = parseFloat(ethers.utils.formatUnits(amounts[amounts.length - 1], 18));
+                    
+                    state.currentPrice = priceInUSDT;
+                    
+                    state.priceHistory.push(state.currentPrice);
+                    if (state.priceHistory.length > 200) state.priceHistory.shift();
+                    
+                    // Volume = 0 pour token custom (pas dispo)
+                    state.indicators.volume = 0;
+                    state.volumeHistory.push(0);
+                    if (state.volumeHistory.length > 50) state.volumeHistory.shift();
+                    
+                    if (state.priceHistory.length >= 50) updateIndicators();
+                    if (state.priceHistory.length % 5 === 0) updateChart();
+                    
+                    document.getElementById('currentPrice').textContent = state.currentPrice.toFixed(6);
+                    
+                } catch (error) {
+                    debugLog(`❌ Erreur prix: ${error.message}`, 'error');
+                }
+            };
+            
+            await fetchPrice();
+            pancakePolling = setInterval(fetchPrice, 3000);
+            debugLog('✅ Polling actif (3s)', 'success');
         }
 
         function calculateEMA(prices, period) {
@@ -981,7 +1039,12 @@
             state.signals.bollinger = distBB >= -0.8 && distBB <= 2.5; // ✅ Balance
             
             // SIGNAL 5: VOLUME - Volume supérieur à la moyenne (FORCE réelle)
-            state.signals.volume = volume > volumeAvg * 1.4; // ✅ Balance: 1.3 → 1.4
+            // Pour tokens custom, volume = true automatiquement (pas de données volume)
+            if (state.selectedCrypto.startsWith('CUSTOM_')) {
+                state.signals.volume = true; // Toujours validé pour token custom
+            } else {
+                state.signals.volume = volume > volumeAvg * 1.4;
+            }
             
             // SIGNAL 6: VOLATILITÉ - ATR dans une zone acceptable
             const atrPct = (atr / state.currentPrice) * 100;
