@@ -1108,14 +1108,28 @@
                         
                         const usdtContract = new ethers.Contract(
                             USDT,
-                            ['function approve(address spender, uint256 amount) public returns (bool)'],
+                            [
+                                'function approve(address spender, uint256 amount) public returns (bool)',
+                                'function allowance(address owner, address spender) view returns (uint256)'
+                            ],
                             state.wallet
                         );
                         
-                        debugLog('🔄 Approve USDT...', 'info');
-                        const approveTx = await usdtContract.approve(PANCAKESWAP_ROUTER, amountIn);
-                        await approveTx.wait();
-                        debugLog('✅ USDT approuvé', 'success');
+                        // 🔍 VÉRIFIER L'ALLOWANCE AVANT D'APPROUVER
+                        const currentAllowance = await usdtContract.allowance(state.account, PANCAKESWAP_ROUTER);
+                        debugLog(`📊 Allowance USDT actuelle: ${ethers.utils.formatUnits(currentAllowance, usdtData.decimals)} USDT`, 'info');
+                        
+                        // ✅ APPROVE SEULEMENT SI NÉCESSAIRE
+                        if (currentAllowance.lt(amountIn)) {
+                            debugLog('🔄 Approve USDT illimité (une seule fois)...', 'warning');
+                            // Approve INFINI pour éviter de refaire à chaque trade
+                            const maxApproval = ethers.constants.MaxUint256;
+                            const approveTx = await usdtContract.approve(PANCAKESWAP_ROUTER, maxApproval);
+                            await approveTx.wait();
+                            debugLog('✅ USDT approuvé infiniment! Plus besoin d\'approuver 🎉', 'success');
+                        } else {
+                            debugLog('✅ USDT déjà approuvé, pas besoin d\'approve!', 'success');
+                        }
                         
                         const router = new ethers.Contract(
                             PANCAKESWAP_ROUTER,
@@ -1158,14 +1172,28 @@
                         
                         const tokenContract = new ethers.Contract(
                             tokenAddress,
-                            ['function approve(address spender, uint256 amount) public returns (bool)'],
+                            [
+                                'function approve(address spender, uint256 amount) public returns (bool)',
+                                'function allowance(address owner, address spender) view returns (uint256)'
+                            ],
                             state.wallet
                         );
                         
-                        debugLog('🔄 Approve Token...', 'info');
-                        const approveTx = await tokenContract.approve(PANCAKESWAP_ROUTER, amountIn);
-                        await approveTx.wait();
-                        debugLog('✅ Token approuvé', 'success');
+                        // 🔍 VÉRIFIER L'ALLOWANCE AVANT D'APPROUVER
+                        const currentAllowance = await tokenContract.allowance(state.account, PANCAKESWAP_ROUTER);
+                        debugLog(`📊 Allowance Token actuelle: ${ethers.utils.formatEther(currentAllowance)} tokens`, 'info');
+                        
+                        // ✅ APPROVE SEULEMENT SI NÉCESSAIRE
+                        if (currentAllowance.lt(amountIn)) {
+                            debugLog('🔄 Approve Token illimité (une seule fois)...', 'warning');
+                            // Approve INFINI pour éviter de refaire à chaque trade
+                            const maxApproval = ethers.constants.MaxUint256;
+                            const approveTx = await tokenContract.approve(PANCAKESWAP_ROUTER, maxApproval);
+                            await approveTx.wait();
+                            debugLog('✅ Token approuvé infiniment! Plus besoin d\'approuver 🎉', 'success');
+                        } else {
+                            debugLog('✅ Token déjà approuvé, pas besoin d\'approve!', 'success');
+                        }
                         
                         const router = new ethers.Contract(
                             PANCAKESWAP_ROUTER,
