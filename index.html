@@ -3,51 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bot Trading PRO - Indicateurs Optimisés | Crypto 2025</title>
+    <title>🤖 JERCAT Trading Bot - Auto-Validation</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
             min-height: 100vh;
         }
         .glass-effect {
-            background: rgba(15, 23, 42, 0.8);
+            background: linear-gradient(to bottom right, #1e293b, #0f172a);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid #334155;
         }
         .gradient-text {
-            background: linear-gradient(90deg, #10b981, #3b82f6, #8b5cf6);
+            background: linear-gradient(90deg, #10b981, #3b82f6, #8b5cf6, #ec4899, #f59e0b);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-size: 200% auto;
-            animation: gradient 3s linear infinite;
+            background-size: 1000% 1000%;
+            animation: gradient 30s linear infinite;
+            font-weight: 900;
         }
         @keyframes gradient {
             0% { background-position: 0% center; }
-            100% { background-position: 200% center; }
+            100% { background-position: 1000% center; }
         }
     </style>
 </head>
 <body class="text-white p-4 md:p-6">
     <div class="max-w-7xl mx-auto">
         <!-- Header -->
-        <div class="glass-effect rounded-2xl p-6 mb-6 border-2 border-purple-500/50">
+        <div class="glass-effect rounded-2xl p-6 mb-6 border-2" style="border-color: #f59e0b;">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 class="text-4xl font-bold gradient-text mb-2">
+                    <h1 class="text-5xl font-black gradient-text mb-2" style="text-shadow: 0 4px 8px rgba(0,0,0,0.8), 0 0 40px rgba(245, 158, 11, 0.6), 0 0 80px rgba(245, 158, 11, 0.4); transform: translateZ(0); filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.5));">
                         🚀 Bot Trading PRO - Optimisé 2025
                     </h1>
                     <p class="text-gray-400">
-                        ⚡ RSI+MACD+Bollinger • 🎯 TP Dynamique • 📈 Balance OK
+                        ⚡ RSI+MACD+Bollinger • 🎯 TP Dynamique • 🤖 Auto-Validation JERCAT
                     </p>
                 </div>
                 
-                <div class="flex gap-2">
-                    <button onclick="openDashboard()" class="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg">
-                        <span>📊</span>
-                        <span>Dashboard</span>
+                <div class="flex gap-2 flex-wrap">
+                    <button onclick="openJercatWallet()" class="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all shadow-lg" style="background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%); color: #000; box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);">
+                        <span>🤖</span>
+                        <span>JERCAT Wallet</span>
                     </button>
                     <button onclick="connectWallet()" id="connectBtn" class="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg">
                         <span>👛</span>
@@ -78,7 +79,7 @@
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm text-gray-400 mb-2">Clé Privée</label>
-                        <input type="password" id="privateKeyInput" placeholder="0x..." class="w-full glass-effect rounded-lg px-4 py-3 focus:outline-none focus:border-red-400 border-2 border-gray-600 font-mono text-sm">
+                        <input type="password" id="privateKeyInput" placeholder="0x..." class="w-full glass-effect rounded-lg px-4 py-3 focus:outline-none focus:border-red-400 border-2 border-gray-600 font-mono text-sm text-white">
                     </div>
                     
                     <button onclick="connectWithPrivateKey()" class="w-full px-6 py-3 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 rounded-lg font-semibold transition-all">
@@ -89,181 +90,133 @@
         </div>
 
         <!-- Debug Console -->
-        <div class="glass-effect rounded-xl p-6 mb-6 border-2 border-cyan-500/50">
+        <div class="glass-effect rounded-xl p-6 mb-6 border-2" style="border-color: #f59e0b;">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold">🔍 Console</h3>
-                <button onclick="clearDebugLog()" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm">
+                <h3 class="text-xl font-bold" style="color: #f59e0b;">🔍 Console</h3>
+                <button onclick="clearDebugLog()" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-semibold">
                     🗑️ Effacer
                 </button>
             </div>
-            <div id="debugConsole" class="bg-black/70 rounded-lg p-4 h-48 overflow-y-auto font-mono text-xs border border-cyan-500/30">
-                <p class="text-cyan-400">✅ Bot initialisé</p>
+            <div id="debugConsole" class="bg-black/70 rounded-lg p-4 h-48 overflow-y-auto font-mono text-xs" style="border: 1px solid #f59e0b;">
+                <p style="color: #f59e0b;">✅ JERCAT Bot initialisé - Auto-validation activée</p>
             </div>
         </div>
 
         <!-- Crypto Selector -->
-        <div id="cryptoSelector" class="glass-effect rounded-xl p-6 mb-6 hidden">
+        <div id="cryptoSelector" class="glass-effect rounded-xl p-6 mb-6 border border-gray-500 hidden">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                     <label class="block text-sm text-gray-400 mb-2">Crypto</label>
-                    <select id="cryptoSelect" onchange="changeCrypto()" class="w-full glass-effect rounded-lg px-4 py-3 focus:outline-none focus:border-purple-400 text-lg font-semibold cursor-pointer">
+                    <select id="cryptoSelect" onchange="changeCrypto()" class="w-full glass-effect rounded-lg px-4 py-3 focus:outline-none border-2 border-gray-600 text-lg font-semibold cursor-pointer text-white" style="border-color: #334155;">
                         <option>Chargement...</option>
                     </select>
                 </div>
                 
                 <div>
                     <label class="block text-sm text-gray-400 mb-2">Mode</label>
-                    <select id="tradingMode" onchange="changeTradingMode()" class="w-full glass-effect rounded-lg px-4 py-3 focus:outline-none focus:border-purple-400 text-lg font-semibold cursor-pointer">
+                    <select id="tradingMode" onchange="changeTradingMode()" class="w-full glass-effect rounded-lg px-4 py-3 focus:outline-none border-2 border-gray-600 text-lg font-semibold cursor-pointer text-white" style="border-color: #334155;">
                         <option value="simulation">🎮 Simulation</option>
                         <option value="real" selected>💎 Réel</option>
                     </select>
                 </div>
             </div>
-            
-            <!-- Token personnalisé par adresse -->
-            <div class="border-t-2 border-gray-700 pt-4">
-                <label class="block text-sm text-gray-400 mb-2">🔍 <span class="font-bold">Token personnalisé</span> (adresse contrat BSC):</label>
-                <div class="flex gap-3">
-                    <input type="text" id="customTokenAddress" placeholder="0x..." class="flex-1 glass-effect rounded-lg px-4 py-3 focus:outline-none focus:border-blue-400 border-2 border-gray-600 font-mono text-sm">
-                    <button onclick="addCustomToken()" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 rounded-lg font-semibold whitespace-nowrap">
-                        ✅ Vérifier
-                    </button>
-                </div>
-                <p class="text-xs text-gray-500 mt-2">💡 Exemple: 0x197CF8951d93325A9333857Ee5330daF7aC4bcCF (JERCAT)</p>
-                <p class="text-xs text-yellow-500 mt-1">⚠️ Vérifiez toujours l'adresse sur BscScan avant de trader!</p>
-                
-                <!-- Info token custom -->
-                <div id="customTokenInfo" class="hidden mt-4 glass-effect rounded-lg p-4 border-2 border-green-500">
-                    <div class="flex items-center justify-between">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="text-2xl">✅</span>
-                                <div>
-                                    <p class="font-bold text-xl text-green-400" id="customTokenSymbol">-</p>
-                                    <p class="text-sm text-gray-400" id="customTokenName">-</p>
-                                </div>
-                            </div>
-                            <p class="text-xs text-gray-500 font-mono break-all" id="customTokenAddr">-</p>
-                            <p class="text-sm text-gray-400 mt-2">Décimales: <span class="text-white font-bold" id="customTokenDecimals">-</span></p>
-                        </div>
-                        <button onclick="useCustomToken()" class="ml-4 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 rounded-lg font-semibold whitespace-nowrap">
-                            🚀 Trader
-                        </button>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- Capital -->
-        <div id="capitalSection" class="glass-effect rounded-xl p-6 mb-6 border-2 border-green-500 hidden">
-            <h3 class="text-xl font-bold mb-4">💰 Capital</h3>
+        <div id="capitalSection" class="glass-effect rounded-xl p-6 mb-6 border-2 hidden" style="border-color: #f59e0b;">
+            <h3 class="text-xl font-bold mb-4" style="color: #f59e0b;">💰 Capital</h3>
             <div class="flex gap-4">
-                <input type="number" id="capitalInput" placeholder="Ex: 100" value="100" class="flex-1 glass-effect rounded-lg px-4 py-3 focus:outline-none focus:border-green-400 border-2 border-gray-600">
-                <button onclick="setCapital()" class="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-lg font-semibold">
+                <input type="number" id="capitalInput" placeholder="Ex: 100" value="100" class="flex-1 glass-effect rounded-lg px-4 py-3 focus:outline-none border-2 border-gray-600 text-white">
+                <button onclick="setCapital()" class="px-8 py-3 rounded-lg font-semibold" style="background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%); color: #000;">
                     ✅ Définir
                 </button>
             </div>
         </div>
 
-        <!-- Modifier Capital (visible après définition) -->
-        <div id="changeCapitalSection" class="glass-effect rounded-xl p-6 mb-6 border-2 border-yellow-500 hidden">
-            <h3 class="text-xl font-bold mb-4">💰 Modifier Capital</h3>
-            <div class="flex gap-4 items-center">
-                <div class="flex-1">
-                    <p class="text-sm text-gray-400 mb-2">Capital actuel: <span class="text-green-400 font-bold text-lg">${<span id="currentCapitalDisplay">0</span>}</span></p>
-                    <input type="number" id="newCapitalInput" placeholder="Nouveau capital" class="w-full glass-effect rounded-lg px-4 py-3 focus:outline-none focus:border-yellow-400 border-2 border-gray-600">
-                </div>
-                <button onclick="changeCapital()" class="px-8 py-3 bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 rounded-lg font-semibold">
-                    🔄 Changer
-                </button>
-            </div>
-            <p class="text-xs text-yellow-400 mt-2">⚠️ Arrêtez le bot avant de changer le capital</p>
-        </div>
-
         <!-- Stats -->
         <div id="statsCards" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 hidden">
-            <div class="glass-effect rounded-xl p-4 border border-green-500/30">
+            <div class="glass-effect rounded-xl p-4 border-2" style="border-color: #f59e0b;">
                 <p class="text-xs text-gray-400">Capital</p>
-                <p class="text-2xl font-bold text-green-400">$<span id="capitalDisplay">0</span></p>
+                <p class="text-2xl font-bold" style="color: #f59e0b;">$<span id="capitalDisplay">0</span></p>
             </div>
             
-            <div class="glass-effect rounded-xl p-4 border border-blue-500/30">
+            <div class="glass-effect rounded-xl p-4 border border-gray-500">
                 <p class="text-xs text-gray-400">Prix</p>
-                <p class="text-2xl font-bold">$<span id="currentPrice">...</span></p>
+                <p class="text-2xl font-bold text-white">$<span id="currentPrice">...</span></p>
             </div>
             
-            <div class="glass-effect rounded-xl p-4 border border-purple-500/30">
+            <div class="glass-effect rounded-xl p-4 border border-gray-500">
                 <p class="text-xs text-gray-400">Profit</p>
                 <p class="text-2xl font-bold text-green-400">$<span id="profitDisplay">0</span></p>
             </div>
             
-            <div class="glass-effect rounded-xl p-4 border border-yellow-500/30">
+            <div class="glass-effect rounded-xl p-4 border border-gray-500">
                 <p class="text-xs text-gray-400">Win Rate</p>
-                <p class="text-2xl font-bold" id="winRateDisplay">0%</p>
+                <p class="text-2xl font-bold text-white" id="winRateDisplay">0%</p>
             </div>
         </div>
 
         <!-- Signals -->
-        <div class="glass-effect rounded-xl p-6 mb-6">
-            <h3 class="text-xl font-bold mb-4">⚡ Signaux (≥75% - Qualité > Quantité)</h3>
+        <div class="glass-effect rounded-xl p-6 mb-6 border border-gray-500">
+            <h3 class="text-xl font-bold mb-4" style="color: #f59e0b;">⚡ Signaux (≥75%)</h3>
             <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
                 <div class="glass-effect border-2 border-slate-600 rounded-lg p-3" id="signal-trend">
                     <div class="flex justify-between items-center">
-                        <span class="text-sm font-bold">EMA</span>
+                        <span class="text-sm font-bold" style="color: #f59e0b;">EMA</span>
                         <span class="text-2xl" id="signal-trend-icon">⚪</span>
                     </div>
-                    <p class="text-xs mt-1 font-mono" id="trend-display">--</p>
+                    <p class="text-xs mt-1 font-mono text-gray-400" id="trend-display">--</p>
                 </div>
 
                 <div class="glass-effect border-2 border-slate-600 rounded-lg p-3" id="signal-rsi">
                     <div class="flex justify-between items-center">
-                        <span class="text-sm font-bold">RSI</span>
+                        <span class="text-sm font-bold" style="color: #f59e0b;">RSI</span>
                         <span class="text-2xl" id="signal-rsi-icon">⚪</span>
                     </div>
-                    <p class="text-xs mt-1 font-mono" id="rsi-display">--</p>
+                    <p class="text-xs mt-1 font-mono text-gray-400" id="rsi-display">--</p>
                 </div>
 
                 <div class="glass-effect border-2 border-slate-600 rounded-lg p-3" id="signal-macd">
                     <div class="flex justify-between items-center">
-                        <span class="text-sm font-bold">MACD</span>
+                        <span class="text-sm font-bold" style="color: #f59e0b;">MACD</span>
                         <span class="text-2xl" id="signal-macd-icon">⚪</span>
                     </div>
-                    <p class="text-xs mt-1 font-mono" id="macd-display">--</p>
+                    <p class="text-xs mt-1 font-mono text-gray-400" id="macd-display">--</p>
                 </div>
 
                 <div class="glass-effect border-2 border-slate-600 rounded-lg p-3" id="signal-bollinger">
                     <div class="flex justify-between items-center">
-                        <span class="text-sm font-bold">BB</span>
+                        <span class="text-sm font-bold" style="color: #f59e0b;">BB</span>
                         <span class="text-2xl" id="signal-bollinger-icon">⚪</span>
                     </div>
-                    <p class="text-xs mt-1 font-mono" id="bollinger-display">--</p>
+                    <p class="text-xs mt-1 font-mono text-gray-400" id="bollinger-display">--</p>
                 </div>
 
                 <div class="glass-effect border-2 border-slate-600 rounded-lg p-3" id="signal-volume">
                     <div class="flex justify-between items-center">
-                        <span class="text-sm font-bold">Volume</span>
+                        <span class="text-sm font-bold" style="color: #f59e0b;">Volume</span>
                         <span class="text-2xl" id="signal-volume-icon">⚪</span>
                     </div>
-                    <p class="text-xs mt-1 font-mono" id="volume-display">--</p>
+                    <p class="text-xs mt-1 font-mono text-gray-400" id="volume-display">--</p>
                 </div>
 
                 <div class="glass-effect border-2 border-slate-600 rounded-lg p-3" id="signal-volatility">
                     <div class="flex justify-between items-center">
-                        <span class="text-sm font-bold">ATR</span>
+                        <span class="text-sm font-bold" style="color: #f59e0b;">ATR</span>
                         <span class="text-2xl" id="signal-volatility-icon">⚪</span>
                     </div>
-                    <p class="text-xs mt-1 font-mono" id="volatility-display">--</p>
+                    <p class="text-xs mt-1 font-mono text-gray-400" id="volatility-display">--</p>
                 </div>
             </div>
 
-            <div class="bg-gradient-to-r from-green-500/20 to-blue-500/20 border-2 border-green-500 rounded-xl p-4">
+            <div class="rounded-xl p-4 border-2" style="background: linear-gradient(to right, rgba(245, 158, 11, 0.2), rgba(249, 115, 22, 0.2)); border-color: #f59e0b;">
                 <div class="flex justify-between items-center mb-2">
-                    <p class="text-lg font-bold">
-                        Score: <span class="text-green-400 text-2xl" id="signal-score">0%</span>
+                    <p class="text-lg font-bold text-white">
+                        Score: <span style="color: #f59e0b;" class="text-2xl" id="signal-score">0%</span>
                     </p>
                 </div>
                 <div class="w-full h-4 bg-slate-800 rounded-full overflow-hidden">
-                    <div class="h-full bg-gradient-to-r from-red-500 via-yellow-400 to-green-500 transition-all duration-300" id="signal-progress" style="width: 0%"></div>
+                    <div class="h-full transition-all duration-300" id="signal-progress" style="width: 0%; background: linear-gradient(to right, #dc2626, #fbbf24, #f59e0b);"></div>
                 </div>
                 <p class="text-xs text-gray-400 mt-2 text-center" id="signal-status">En attente...</p>
             </div>
@@ -272,16 +225,16 @@
         <!-- Chart & Controls -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-2 space-y-6">
-                <div class="glass-effect rounded-xl p-6">
-                    <h2 class="text-xl font-bold mb-4">📈 Graphique</h2>
+                <div class="glass-effect rounded-xl p-6 border border-gray-500">
+                    <h2 class="text-xl font-bold mb-4" style="color: #f59e0b;">📈 Graphique</h2>
                     <div class="h-48">
                         <canvas id="tradingChart"></canvas>
                     </div>
                 </div>
 
-                <div class="glass-effect rounded-xl p-6">
+                <div class="glass-effect rounded-xl p-6 border border-gray-500">
                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold">📋 Trades</h2>
+                        <h2 class="text-xl font-bold" style="color: #f59e0b;">📋 Trades</h2>
                         <button onclick="toggleBot()" id="toggleBotBtn" disabled class="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold bg-gray-600 cursor-not-allowed">
                             <span id="botIcon">▶️</span>
                             <span id="botText">Start</span>
@@ -297,35 +250,39 @@
             </div>
 
             <div class="space-y-6">
-                <div class="glass-effect rounded-xl p-6">
-                    <h2 class="text-xl font-bold mb-4">⚙️ Paramètres</h2>
+                <div class="glass-effect rounded-xl p-6 border border-gray-500">
+                    <h2 class="text-xl font-bold mb-4" style="color: #f59e0b;">⚙️ Paramètres</h2>
                     <div class="space-y-3">
                         <div>
-                            <label class="block text-xs text-gray-400 mb-1">% par trade (min 15%)</label>
-                            <input type="number" id="tradePercent" value="15" min="5" max="100" class="w-full glass-effect rounded-lg px-3 py-2 text-sm">
+                            <label class="block text-xs text-gray-400 mb-1">% par trade</label>
+                            <input type="number" id="tradePercent" value="10" min="1" max="100" class="w-full glass-effect rounded-lg px-3 py-2 text-sm border-2 border-gray-600 text-white">
                         </div>
                         <div>
-                            <label class="block text-xs text-gray-400 mb-1">TP % (après frais)</label>
-                            <input type="number" id="tpMultiplier" value="4" min="1" max="10" step="0.5" class="w-full glass-effect rounded-lg px-3 py-2 text-sm">
+                            <label class="block text-xs text-gray-400 mb-1">TP Mult</label>
+                            <input type="number" id="tpMultiplier" value="3" min="1.5" max="5" step="0.25" class="w-full glass-effect rounded-lg px-3 py-2 text-sm border-2 border-gray-600 text-white">
                         </div>
                         <div>
-                            <label class="block text-xs text-gray-400 mb-1">SL % (après frais)</label>
-                            <input type="number" id="slMultiplier" value="1.5" min="0.5" max="5" step="0.25" class="w-full glass-effect rounded-lg px-3 py-2 text-sm">
+                            <label class="block text-xs text-gray-400 mb-1">SL Mult</label>
+                            <input type="number" id="slMultiplier" value="1.5" min="0.5" max="3" step="0.25" class="w-full glass-effect rounded-lg px-3 py-2 text-sm border-2 border-gray-600 text-white">
                         </div>
                         <div>
-                            <label class="block text-xs text-gray-400 mb-1">Score min (%) - Qualité > Quantité</label>
-                            <input type="number" id="minScore" value="75" min="50" max="100" step="5" class="w-full glass-effect rounded-lg px-3 py-2 text-sm">
+                            <label class="block text-xs text-gray-400 mb-1">Score min (%)</label>
+                            <input type="number" id="minScore" value="75" min="50" max="100" step="5" class="w-full glass-effect rounded-lg px-3 py-2 text-sm border-2 border-gray-600 text-white">
+                        </div>
+                        <div class="rounded-lg p-3 border-2" style="background: rgba(245, 158, 11, 0.2); border-color: #f59e0b;">
+                            <p class="text-xs font-bold" style="color: #f59e0b;">✅ Profit minimum: 3%</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="glass-effect rounded-xl p-6">
-                    <h3 class="text-lg font-bold mb-3">📊 Statut</h3>
+                <div class="glass-effect rounded-xl p-6 border border-gray-500">
+                    <h3 class="text-lg font-bold mb-3" style="color: #f59e0b;">📊 Statut</h3>
                     <div class="space-y-2 text-sm">
-                        <p>Wallet: <span id="walletStatus">🔴 Non</span></p>
-                        <p>Mode: <span id="modeStatus">--</span></p>
-                        <p>Position: <span id="positionStatus">⚪ None</span></p>
-                        <p>Trades: <span id="tradesCount">0</span></p>
+                        <p>Wallet: <span id="walletStatus" class="text-red-400">🔴 Non</span></p>
+                        <p>Mode: <span id="modeStatus" class="text-gray-400">--</span></p>
+                        <p>Position: <span id="positionStatus" class="text-gray-400">⚪ None</span></p>
+                        <p>Trades: <span id="tradesCount" class="text-white">0</span></p>
+                        <p>Auto-Validation: <span id="jercatStatus" style="color: #f59e0b;">⏳ En attente...</span></p>
                     </div>
                 </div>
             </div>
@@ -333,162 +290,22 @@
     </div>
 
     <script>
-        // 📊 FONCTION DASHBOARD - LIEN VERCEL
-        function openDashboard() {
-            // Sauvegarder l'état avant d'ouvrir
-            saveState();
-            
-            // Ouvrir le dashboard Vercel
-            window.open('https://dashboard-stats-pro.vercel.app/', '_blank');
-            
-            debugLog('📊 Dashboard Vercel ouvert !', 'success');
+        // 🤖 JERCAT WALLET INTEGRATION
+        function openJercatWallet() {
+            debugLog('🤖 Ouverture du JERCAT Secure Wallet...', 'success');
+            window.open('https://wallet-one-ochre.vercel.app/', '_blank', 'width=1200,height=800');
+            debugLog('✅ Wallet ouvert dans une nouvelle fenêtre', 'info');
         }
 
-        // 🔧 SAUVEGARDE/RESTAURATION DE L'ÉTAT
-        function saveState() {
-            try {
-                const saveData = {
-                    account: state.account,
-                    tradingCapital: state.tradingCapital,
-                    initialCapital: state.initialCapital,
-                    capitalSet: state.capitalSet,
-                    tradingMode: state.tradingMode,
-                    selectedCrypto: state.selectedCrypto,
-                    portfolio: state.portfolio,
-                    currentPosition: state.currentPosition,
-                    lastBuyPrice: state.lastBuyPrice,
-                    positionAmount: state.positionAmount,
-                    entryFees: state.entryFees,
-                    trades: state.trades.slice(0, 50),
-                    botRunning: state.botRunning,
-                    timestamp: Date.now()
-                };
-                localStorage.setItem('botState', JSON.stringify(saveData));
-            } catch (error) {
-                debugLog(`⚠️ Erreur sauvegarde: ${error.message}`, 'warning');
-            }
+        // Private Key Modal
+        function togglePrivateKeyModal() {
+            document.getElementById('privateKeyModal').classList.toggle('hidden');
         }
 
-        function loadState() {
-            try {
-                const saved = localStorage.getItem('botState');
-                if (saved) {
-                    const data = JSON.parse(saved);
-                    const age = (Date.now() - data.timestamp) / 1000 / 60;
-                    
-                    if (age < 1440) { // 24h
-                        Object.assign(state, data);
-                        debugLog(`✅ État restauré (${age.toFixed(0)}min ago)`, 'success');
-                        return true;
-                    } else {
-                        debugLog('⚠️ État trop ancien, ignoré', 'warning');
-                    }
-                }
-            } catch (error) {
-                debugLog(`⚠️ Erreur restauration: ${error.message}`, 'warning');
-            }
-            return false;
-        }
-
-        // 🔧 RPCs BSC avec backup
         const BSC_RPCS = [
             'https://bsc-dataseed.binance.org',
-            'https://bsc-dataseed1.defibit.io',
-            'https://bsc-dataseed1.ninicoin.io',
-            'https://rpc.ankr.com/bsc'
+            'https://bsc-dataseed1.defibit.io'
         ];
-        let currentRpcIndex = 0;
-        
-        const PANCAKESWAP_ROUTER = '0x10ED43C718714eb63d5aA57B78B54704E256024E';
-        const WBNB = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c';
-        const USDT = '0x55d398326f99059fF775485246999027B3197955';
-        
-        const TOKEN_ADDRESSES = {
-            'BTCUSDT': '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c',
-            'ETHUSDT': '0x2170Ed0880ac9A755fd29B2688956BD959F933F8',
-            'BNBUSDT': WBNB,
-            'SOLUSDT': '0x570A5D26f7765Ecb712C0924E4De545B89fD43dF'
-        };
-        
-        function getTokenAddress(symbol) {
-            // Si token custom
-            if (symbol && symbol.startsWith('CUSTOM_') && state.customToken) {
-                return state.customToken.address;
-            }
-            // Sinon token pré-configuré
-            return TOKEN_ADDRESSES[symbol] || WBNB;
-        }
-        
-        async function getProvider(useBackup = false) {
-            const rpcUrl = useBackup ? BSC_RPCS[currentRpcIndex] : BSC_RPCS[0];
-            const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
-            
-            try {
-                await provider.getBlockNumber();
-                debugLog(`✅ RPC OK: ${rpcUrl}`, 'success');
-                return provider;
-            } catch (error) {
-                debugLog(`❌ RPC fail: ${rpcUrl}`, 'error');
-                if (currentRpcIndex < BSC_RPCS.length - 1) {
-                    currentRpcIndex++;
-                    debugLog(`🔄 Essai backup RPC ${currentRpcIndex + 1}/${BSC_RPCS.length}...`, 'warning');
-                    return getProvider(true);
-                }
-                throw new Error('Tous les RPCs ont échoué');
-            }
-        }
-        
-        async function getUSDTBalance(address, provider, retries = 3) {
-            for (let i = 0; i < retries; i++) {
-                try {
-                    if (i > 0) {
-                        const delay = 1500 * i;
-                        debugLog(`⏳ Attente ${(delay/1000).toFixed(1)}s avant retry...`, 'info');
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                    }
-                    
-                    debugLog(`🔄 Vérification solde USDT (tentative ${i + 1}/${retries})...`, 'info');
-                    
-                    const network = await provider.getNetwork();
-                    if (network.chainId !== 56) {
-                        debugLog(`⚠️ Mauvais réseau détecté: ${network.chainId}`, 'warning');
-                        throw new Error('Provider not on BSC network');
-                    }
-                    
-                    const usdtContract = new ethers.Contract(
-                        USDT,
-                        [
-                            'function balanceOf(address) view returns (uint256)',
-                            'function decimals() view returns (uint8)'
-                        ],
-                        provider
-                    );
-                    
-                    const [balance, decimals] = await Promise.all([
-                        usdtContract.balanceOf(address),
-                        usdtContract.decimals()
-                    ]);
-                    
-                    debugLog(`✅ Solde récupéré (decimals: ${decimals})`, 'success');
-                    
-                    return {
-                        balance: balance,
-                        formatted: parseFloat(ethers.utils.formatUnits(balance, decimals)),
-                        decimals: decimals
-                    };
-                } catch (error) {
-                    const isLastAttempt = i === retries - 1;
-                    const errorMsg = error.message.includes('underlying network') ? 
-                        'Changement de réseau détecté' : error.message;
-                    
-                    debugLog(`⚠️ Erreur (${i + 1}/${retries}): ${errorMsg}`, 'warning');
-                    
-                    if (isLastAttempt) {
-                        throw error;
-                    }
-                }
-            }
-        }
         
         let state = {
             account: null,
@@ -497,7 +314,6 @@
             isConnected: false,
             connectionMethod: null,
             selectedCrypto: 'BTCUSDT',
-            customToken: null, // Token personnalisé {address, name, symbol, decimals}
             currentPrice: 0,
             priceHistory: [],
             volumeHistory: [],
@@ -507,27 +323,45 @@
             tradingMode: 'real',
             botRunning: false,
             trades: [],
-            portfolio: { profit: 0, wins: 0, losses: 0, bestTrade: 0, worstTrade: 0 },
-            tokenStats: {}, // Stats par token: {BTCUSDT: {trades: 5, profit: 10, wins: 3, losses: 2}}
-            indicators: { ema9: 0, ema21: 0, ema50: 0, rsi: 50, macd: 0, macdHist: 0, bbUpper: 0, bbLower: 0, atr: 0, volume: 0, volumeAvg: 0 },
-            signals: { trend: false, rsi: false, macd: false, bollinger: false, volume: false, volatility: false },
+            portfolio: { profit: 0, wins: 0, losses: 0 },
+            indicators: {},
+            signals: {},
             currentPosition: null,
             lastBuyPrice: 0,
             positionAmount: 0,
-            tokensBought: 0, // Montant réel de tokens acheté
             entryFees: 0,
-            lastMacdHist: 0,
-            isTrading: false,
-            lastTradeTime: 0
+            minProfitPct: 3.0,
+            jercatTrusted: false  // 🔥 AUTO-VALIDATION
         };
 
         let ws = null;
         let botInterval = null;
         let chart = null;
 
+        // 🤖 FONCTION GLOBALE POUR ÉTABLIR LA CONFIANCE (appelée par JERCAT Wallet)
+        window.establishJercatTrust = function(appName) {
+            if (appName === 'jercat-bot' || appName === 'jercat-wallet' || appName === 'jercat-dex') {
+                state.jercatTrusted = true;
+                debugLog(`🤖 Confiance établie: ${appName}`, 'success');
+                debugLog('✅ Trades AUTO-VALIDÉS (pas de confirmation)', 'success');
+                
+                const statusDiv = document.getElementById('jercatStatus');
+                if (statusDiv) {
+                    statusDiv.innerHTML = '<span style="color: #10b981;">🟢 JERCAT Auto ✅</span>';
+                }
+                
+                const walletStatusDiv = document.getElementById('walletStatus');
+                if (walletStatusDiv) {
+                    walletStatusDiv.innerHTML = '<span style="color: #10b981;">🟢 JERCAT Auto ✅</span>';
+                }
+                return true;
+            }
+            return false;
+        };
+
         function debugLog(msg, type = 'info') {
             const time = new Date().toLocaleTimeString('fr-FR');
-            const color = type === 'error' ? 'text-red-400' : type === 'success' ? 'text-green-400' : type === 'warning' ? 'text-yellow-400' : 'text-cyan-400';
+            const color = type === 'error' ? 'text-red-400' : type === 'success' ? 'text-green-400' : type === 'warning' ? 'text-yellow-400' : 'color: #f59e0b;';
             const console = document.getElementById('debugConsole');
             if (console) {
                 const p = document.createElement('p');
@@ -540,53 +374,35 @@
         }
 
         function clearDebugLog() {
-            document.getElementById('debugConsole').innerHTML = '<p class="text-cyan-400">✅ Console effacée</p>';
+            document.getElementById('debugConsole').innerHTML = '<p style="color: #f59e0b;">✅ Console effacée - JERCAT Bot actif</p>';
         }
 
+        // Détecter si ouvert depuis JERCAT Wallet
         window.addEventListener('DOMContentLoaded', () => {
-            debugLog('🚀 Bot Trading PRO initialisé', 'success');
-            debugLog('📊 Dashboard: https://dashboard-stats-pro.vercel.app/', 'info');
+            debugLog('🤖 JERCAT Trading Bot initialisé', 'success');
+            debugLog('🎯 Profit minimum: 3%', 'success');
+            debugLog('🔗 Intégration JERCAT Wallet active', 'info');
+            
+            // Vérifier referrer
+            if (document.referrer.includes('wallet-one-ochre.vercel.app') || 
+                document.referrer.includes('jercat-wallet') ||
+                document.referrer.includes('localhost')) {
+                state.jercatTrusted = true;
+                debugLog('🤖 JERCAT Wallet détecté via referrer', 'success');
+                debugLog('✅ Mode AUTO-VALIDATION activé', 'success');
+                document.getElementById('jercatStatus').innerHTML = '<span style="color: #10b981;">🟢 JERCAT Auto ✅</span>';
+            }
+            
+            // Vérifier window.opener
+            if (window.opener) {
+                state.jercatTrusted = true;
+                debugLog('🤖 Ouvert par JERCAT Wallet', 'success');
+                debugLog('✅ Mode AUTO-VALIDATION activé', 'success');
+                document.getElementById('jercatStatus').innerHTML = '<span style="color: #10b981;">🟢 JERCAT Auto ✅</span>';
+            }
+            
             initChart();
             loadCryptos();
-            
-            // Restaurer état
-            if (loadState()) {
-                updateUI();
-            }
-            
-            // Sauvegarder toutes les 10 secondes
-            setInterval(saveState, 10000);
-            
-            if (window.ethereum) {
-                window.ethereum.on('chainChanged', (chainId) => {
-                    debugLog(`🔄 Réseau changé: ${parseInt(chainId, 16)}`, 'warning');
-                    
-                    if (parseInt(chainId, 16) !== 56) {
-                        debugLog('⚠️ Vous devez être sur BSC (ChainID 56)!', 'warning');
-                        alert('⚠️ Veuillez rester sur le réseau Binance Smart Chain (BSC)');
-                    } else {
-                        debugLog('✅ Réseau BSC confirmé', 'success');
-                        
-                        if (state.isConnected && state.connectionMethod === 'metamask') {
-                            state.provider = new ethers.providers.Web3Provider(window.ethereum);
-                            state.wallet = state.provider.getSigner();
-                            debugLog('✅ Provider mis à jour', 'success');
-                        }
-                    }
-                });
-                
-                window.ethereum.on('accountsChanged', (accounts) => {
-                    if (accounts.length === 0) {
-                        debugLog('❌ MetaMask déconnecté', 'error');
-                        state.isConnected = false;
-                        updateUI();
-                    } else if (accounts[0] !== state.account) {
-                        debugLog(`🔄 Compte changé: ${accounts[0].slice(0, 6)}...`, 'warning');
-                        state.account = accounts[0];
-                        updateUI();
-                    }
-                });
-            }
         });
 
         function initChart() {
@@ -598,7 +414,7 @@
                     datasets: [{
                         label: 'Prix',
                         data: [],
-                        borderColor: 'rgb(139, 92, 246)',
+                        borderColor: '#f59e0b',
                         tension: 0.4,
                         pointRadius: 0,
                         borderWidth: 2
@@ -610,14 +426,10 @@
                     plugins: { legend: { display: false } },
                     scales: {
                         x: { display: false },
-                        y: { display: true, grid: { color: 'rgba(139, 92, 246, 0.1)' }, ticks: { color: 'rgb(156, 163, 175)' } }
+                        y: { display: true, grid: { color: 'rgba(245, 158, 11, 0.1)' }, ticks: { color: '#94a3b8' } }
                     }
                 }
             });
-        }
-
-        function togglePrivateKeyModal() {
-            document.getElementById('privateKeyModal').classList.toggle('hidden');
         }
 
         async function connectWallet() {
@@ -629,63 +441,16 @@
                 debugLog('🔄 Connexion MetaMask...', 'info');
                 const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                 state.account = accounts[0];
-                
-                let tempProvider = new ethers.providers.Web3Provider(window.ethereum);
-                const network = await tempProvider.getNetwork();
-                
-                if (network.chainId !== 56) {
-                    debugLog('⚠️ Mauvais réseau! Basculement vers BSC...', 'warning');
-                    try {
-                        await window.ethereum.request({
-                            method: 'wallet_switchEthereumChain',
-                            params: [{ chainId: '0x38' }],
-                        });
-                        debugLog('✅ Basculé vers BSC', 'success');
-                        await new Promise(resolve => setTimeout(resolve, 1000));
-                    } catch (switchError) {
-                        if (switchError.code === 4902) {
-                            debugLog('🔄 Ajout du réseau BSC...', 'info');
-                            try {
-                                await window.ethereum.request({
-                                    method: 'wallet_addEthereumChain',
-                                    params: [{
-                                        chainId: '0x38',
-                                        chainName: 'Binance Smart Chain',
-                                        nativeCurrency: {
-                                            name: 'BNB',
-                                            symbol: 'BNB',
-                                            decimals: 18
-                                        },
-                                        rpcUrls: ['https://bsc-dataseed1.binance.org'],
-                                        blockExplorerUrls: ['https://bscscan.com']
-                                    }]
-                                });
-                                debugLog('✅ Réseau BSC ajouté', 'success');
-                                await new Promise(resolve => setTimeout(resolve, 1000));
-                            } catch (addError) {
-                                debugLog(`❌ Erreur ajout réseau: ${addError.message}`, 'error');
-                            }
-                        }
-                    }
-                }
-                
                 state.provider = new ethers.providers.Web3Provider(window.ethereum);
                 state.wallet = state.provider.getSigner();
                 state.isConnected = true;
                 state.connectionMethod = 'metamask';
                 
-                const finalNetwork = await state.provider.getNetwork();
-                debugLog(`✅ Connecté sur ${finalNetwork.name} (ChainID: ${finalNetwork.chainId})`, 'success');
-                debugLog(`✅ Wallet: ${state.account.slice(0, 6)}...`, 'success');
+                debugLog(`✅ Connecté: ${state.account.slice(0, 6)}...`, 'success');
                 
-                try {
-                    const usdtData = await getUSDTBalance(state.account, state.provider);
-                    debugLog(`💵 USDT: ${usdtData.formatted.toFixed(2)} USDT`, 'success');
-                } catch (error) {
-                    debugLog(`⚠️ Impossible de récupérer solde USDT: ${error.message}`, 'warning');
-                }
-                
-                showConfig();
+                document.getElementById('cryptoSelector').classList.remove('hidden');
+                document.getElementById('capitalSection').classList.remove('hidden');
+                updateUI();
             } catch (error) {
                 debugLog(`❌ Erreur: ${error.message}`, 'error');
             }
@@ -694,13 +459,13 @@
         async function connectWithPrivateKey() {
             const pk = document.getElementById('privateKeyInput').value.trim();
             if (!pk) {
-                alert('❌ Entrez votre clé');
+                alert('❌ Entrez votre clé privée');
                 return;
             }
             try {
-                debugLog('🔄 Connexion clé privée...', 'info');
+                debugLog('🔄 Connexion avec clé privée...', 'info');
                 
-                state.provider = await getProvider();
+                state.provider = new ethers.providers.JsonRpcProvider(BSC_RPCS[0]);
                 
                 const key = pk.startsWith('0x') ? pk : '0x' + pk;
                 state.wallet = new ethers.Wallet(key, state.provider);
@@ -710,41 +475,23 @@
                 
                 debugLog(`✅ Connecté: ${state.account.slice(0, 6)}...`, 'success');
                 
-                try {
-                    const bnbBal = await state.provider.getBalance(state.account);
-                    debugLog(`💰 BNB: ${parseFloat(ethers.utils.formatEther(bnbBal)).toFixed(4)} BNB`, 'info');
-                } catch (error) {
-                    debugLog(`⚠️ Erreur solde BNB: ${error.message}`, 'warning');
-                }
-                
-                try {
-                    const usdtData = await getUSDTBalance(state.account, state.provider);
-                    debugLog(`💵 USDT: ${usdtData.formatted.toFixed(2)} USDT`, 'success');
-                } catch (error) {
-                    debugLog(`⚠️ Impossible de récupérer solde USDT: ${error.message}`, 'warning');
-                }
-                
                 togglePrivateKeyModal();
                 document.getElementById('privateKeyInput').value = '';
-                showConfig();
+                
+                document.getElementById('cryptoSelector').classList.remove('hidden');
+                document.getElementById('capitalSection').classList.remove('hidden');
+                updateUI();
             } catch (error) {
-                debugLog(`❌ Erreur connexion: ${error.message}`, 'error');
-                alert(`❌ Erreur: ${error.message}`);
+                debugLog(`❌ Erreur: ${error.message}`, 'error');
+                alert(`❌ Clé privée invalide`);
             }
-        }
-
-        function showConfig() {
-            document.getElementById('cryptoSelector').classList.remove('hidden');
-            document.getElementById('capitalSection').classList.remove('hidden');
-            updateUI();
         }
 
         function loadCryptos() {
             const cryptos = [
-                { symbol: 'BTCUSDT', name: '₿ BTC' },
-                { symbol: 'ETHUSDT', name: 'Ξ ETH' },
-                { symbol: 'BNBUSDT', name: '◆ BNB' },
-                { symbol: 'SOLUSDT', name: '◎ SOL' }
+                { symbol: 'BTCUSDT', name: 'BTC' },
+                { symbol: 'ETHUSDT', name: 'ETH' },
+                { symbol: 'BNBUSDT', name: 'BNB' }
             ];
             document.getElementById('cryptoSelect').innerHTML = cryptos.map(c => 
                 `<option value="${c.symbol}">${c.name}</option>`
@@ -755,7 +502,6 @@
 
         function changeCrypto() {
             state.selectedCrypto = document.getElementById('cryptoSelect').value;
-            state.priceHistory = [];
             debugLog(`🔄 Crypto: ${state.selectedCrypto}`, 'info');
             connectWebSocket();
         }
@@ -763,107 +509,10 @@
         function changeTradingMode() {
             state.tradingMode = document.getElementById('tradingMode').value;
             debugLog(`🔄 Mode: ${state.tradingMode}`, 'warning');
-            updateUI();
-        }
-
-        async function addCustomToken() {
-            const address = document.getElementById('customTokenAddress').value.trim();
-            
-            if (!address || !address.startsWith('0x') || address.length !== 42) {
-                alert('❌ Adresse invalide! Format: 0x... (42 caractères)');
-                return;
-            }
-            
-            debugLog(`🔍 Vérification du token: ${address}...`, 'info');
-            
-            try {
-                if (!state.provider) {
-                    alert('❌ Connectez votre wallet d\'abord!');
-                    return;
-                }
-                
-                const network = await state.provider.getNetwork();
-                if (network.chainId !== 56) {
-                    alert('❌ Changez vers BSC Mainnet (ChainID 56)');
-                    return;
-                }
-                
-                const tokenContract = new ethers.Contract(
-                    address,
-                    [
-                        'function name() view returns (string)',
-                        'function symbol() view returns (string)',
-                        'function decimals() view returns (uint8)'
-                    ],
-                    state.provider
-                );
-                
-                debugLog('📡 Récupération des infos...', 'info');
-                const [name, symbol, decimals] = await Promise.all([
-                    tokenContract.name(),
-                    tokenContract.symbol(),
-                    tokenContract.decimals()
-                ]);
-                
-                state.customToken = {
-                    address: address,
-                    name: name,
-                    symbol: symbol,
-                    decimals: decimals
-                };
-                
-                document.getElementById('customTokenSymbol').textContent = symbol;
-                document.getElementById('customTokenName').textContent = name;
-                document.getElementById('customTokenAddr').textContent = address;
-                document.getElementById('customTokenDecimals').textContent = decimals;
-                document.getElementById('customTokenInfo').classList.remove('hidden');
-                
-                debugLog(`✅ Token trouvé: ${symbol} (${name})`, 'success');
-                debugLog(`📊 Adresse: ${address}`, 'info');
-                debugLog(`🔢 Decimals: ${decimals}`, 'info');
-                
-            } catch (error) {
-                debugLog(`❌ Erreur: ${error.message}`, 'error');
-                alert(`❌ Impossible de récupérer les infos!\n\nVérifiez:\n- L'adresse est correcte\n- Le token existe sur BSC\n- Vous êtes sur BSC Mainnet`);
-            }
-        }
-
-        function useCustomToken() {
-            if (!state.customToken) {
-                alert('❌ Aucun token custom défini!');
-                return;
-            }
-            
-            const customSymbol = `CUSTOM_${state.customToken.symbol}`;
-            state.selectedCrypto = customSymbol;
-            
-            const sel = document.getElementById('cryptoSelect');
-            const existingOption = Array.from(sel.options).find(opt => opt.value === customSymbol);
-            if (!existingOption) {
-                const option = document.createElement('option');
-                option.value = customSymbol;
-                option.textContent = `🎯 ${state.customToken.symbol} (Custom)`;
-                sel.appendChild(option);
-            }
-            sel.value = customSymbol;
-            
-            debugLog(`🚀 Trading activé: ${state.customToken.symbol}`, 'success');
-            debugLog(`📍 Adresse: ${state.customToken.address}`, 'info');
-            
-            saveState();
-            alert(`✅ Token personnalisé activé!\n\n${state.customToken.symbol} - ${state.customToken.name}\n\nDéfinissez votre capital et démarrez le bot!`);
         }
 
         function connectWebSocket() {
             if (ws) ws.close();
-            
-            // Si token custom, utiliser polling PancakeSwap au lieu de WebSocket Binance
-            if (state.selectedCrypto.startsWith('CUSTOM_')) {
-                debugLog('📊 Token custom - Prix via PancakeSwap', 'info');
-                startPancakeSwapPolling();
-                return;
-            }
-            
             const symbol = state.selectedCrypto.toLowerCase();
             ws = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol}@ticker`);
             
@@ -872,225 +521,10 @@
             ws.onmessage = (e) => {
                 const data = JSON.parse(e.data);
                 state.currentPrice = parseFloat(data.c);
-                state.indicators.volume = parseFloat(data.v);
-                
                 state.priceHistory.push(state.currentPrice);
-                state.volumeHistory.push(state.indicators.volume);
-                
                 if (state.priceHistory.length > 200) state.priceHistory.shift();
-                if (state.volumeHistory.length > 50) state.volumeHistory.shift();
-                
-                if (state.priceHistory.length >= 50) updateIndicators();
-                if (state.priceHistory.length % 5 === 0) updateChart();
-                
                 document.getElementById('currentPrice').textContent = state.currentPrice.toFixed(2);
             };
-        }
-
-        let pancakePolling = null;
-        
-        async function startPancakeSwapPolling() {
-            if (pancakePolling) clearInterval(pancakePolling);
-            
-            debugLog('🥞 Démarrage polling PancakeSwap...', 'info');
-            
-            const fetchPrice = async () => {
-                try {
-                    if (!state.customToken || !state.provider) return;
-                    
-                    const router = new ethers.Contract(
-                        PANCAKESWAP_ROUTER,
-                        ['function getAmountsOut(uint amountIn, address[] memory path) view returns (uint[] memory amounts)'],
-                        state.provider
-                    );
-                    
-                    // 1 token → combien de USDT ?
-                    const amountIn = ethers.utils.parseUnits('1', state.customToken.decimals);
-                    const path = [state.customToken.address, WBNB, USDT];
-                    
-                    const amounts = await router.getAmountsOut(amountIn, path);
-                    const priceInUSDT = parseFloat(ethers.utils.formatUnits(amounts[amounts.length - 1], 18));
-                    
-                    state.currentPrice = priceInUSDT;
-                    
-                    state.priceHistory.push(state.currentPrice);
-                    if (state.priceHistory.length > 200) state.priceHistory.shift();
-                    
-                    // Volume = 0 pour token custom (pas dispo)
-                    state.indicators.volume = 0;
-                    state.volumeHistory.push(0);
-                    if (state.volumeHistory.length > 50) state.volumeHistory.shift();
-                    
-                    if (state.priceHistory.length >= 50) updateIndicators();
-                    if (state.priceHistory.length % 5 === 0) updateChart();
-                    
-                    document.getElementById('currentPrice').textContent = state.currentPrice.toFixed(6);
-                    
-                } catch (error) {
-                    debugLog(`❌ Erreur prix: ${error.message}`, 'error');
-                }
-            };
-            
-            await fetchPrice();
-            pancakePolling = setInterval(fetchPrice, 3000);
-            debugLog('✅ Polling actif (3s)', 'success');
-        }
-
-        function calculateEMA(prices, period) {
-            if (prices.length === 0) return 0;
-            const k = 2 / (period + 1);
-            let ema = prices[0];
-            for (let i = 1; i < prices.length; i++) {
-                ema = (prices[i] - ema) * k + ema;
-            }
-            return ema;
-        }
-
-        function calculateRSI(prices, period = 14) {
-            if (prices.length < period + 1) return 50;
-            let gains = 0, losses = 0;
-            for (let i = prices.length - period; i < prices.length; i++) {
-                const change = prices[i] - prices[i - 1];
-                if (change > 0) gains += change;
-                else losses -= change;
-            }
-            const avgGain = gains / period;
-            const avgLoss = losses / period;
-            if (avgLoss === 0) return 100;
-            return 100 - (100 / (1 + avgGain / avgLoss));
-        }
-
-        function calculateMACD(prices) {
-            if (prices.length < 26) return { macd: 0, hist: 0 };
-            const ema12 = calculateEMA(prices, 12);
-            const ema26 = calculateEMA(prices, 26);
-            const macd = ema12 - ema26;
-            const macdLine = [];
-            for (let i = 26; i <= prices.length; i++) {
-                const slice = prices.slice(0, i);
-                const e12 = calculateEMA(slice, 12);
-                const e26 = calculateEMA(slice, 26);
-                macdLine.push(e12 - e26);
-            }
-            const signal = calculateEMA(macdLine, 9);
-            return { macd, hist: macd - signal };
-        }
-
-        function calculateBB(prices, period = 20, stdDev = 2) {
-            if (prices.length < period) return { upper: 0, lower: 0 };
-            const slice = prices.slice(-period);
-            const avg = slice.reduce((a, b) => a + b, 0) / period;
-            const variance = slice.reduce((sum, p) => sum + Math.pow(p - avg, 2), 0) / period;
-            const std = Math.sqrt(variance);
-            return {
-                upper: avg + (std * stdDev),
-                lower: avg - (std * stdDev)
-            };
-        }
-
-        function calculateATR(prices, period = 14) {
-            if (prices.length < period + 1) return 0;
-            let sum = 0;
-            for (let i = prices.length - period; i < prices.length; i++) {
-                const high = prices[i] * 1.01;
-                const low = prices[i] * 0.99;
-                const prev = i > 0 ? prices[i - 1] : prices[i];
-                sum += Math.max(high - low, Math.abs(high - prev), Math.abs(low - prev));
-            }
-            return sum / period;
-        }
-
-        function updateIndicators() {
-            if (state.priceHistory.length < 50) return;
-            
-            state.indicators.ema9 = calculateEMA(state.priceHistory, 9);
-            state.indicators.ema21 = calculateEMA(state.priceHistory, 21);
-            state.indicators.ema50 = calculateEMA(state.priceHistory, 50);
-            state.indicators.rsi = calculateRSI(state.priceHistory, 14);
-            
-            const macd = calculateMACD(state.priceHistory);
-            state.lastMacdHist = state.indicators.macdHist;
-            state.indicators.macd = macd.macd;
-            state.indicators.macdHist = macd.hist;
-            
-            const bb = calculateBB(state.priceHistory, 20, 2);
-            state.indicators.bbUpper = bb.upper;
-            state.indicators.bbLower = bb.lower;
-            state.indicators.atr = calculateATR(state.priceHistory, 14);
-            
-            if (state.volumeHistory.length >= 20) {
-                state.indicators.volumeAvg = state.volumeHistory.slice(-20).reduce((a, b) => a + b, 0) / 20;
-            }
-            
-            updateSignals();
-        }
-
-        function updateSignals() {
-            const { ema9, ema21, ema50, rsi, macdHist, bbUpper, bbLower, volume, volumeAvg, atr } = state.indicators;
-            
-            // SIGNAL 1: TREND - EMA alignées haussières (STRICT)
-            state.signals.trend = ema9 > ema21 && ema21 > ema50;
-            
-            // SIGNAL 2: RSI - Zone OPTIMALE d'achat (survente modérée)
-            state.signals.rsi = rsi >= 25 && rsi <= 50; // ✅ Balance: pas trop large
-            
-            // SIGNAL 3: MACD - Croisement haussier (histogram passe en positif)
-            state.signals.macd = macdHist > 0 && state.lastMacdHist <= 0;
-            
-            // SIGNAL 4: BOLLINGER - Prix proche de la bande basse (rebond probable)
-            const distBB = ((state.currentPrice - bbLower) / bbLower) * 100;
-            state.signals.bollinger = distBB >= -0.8 && distBB <= 2.5; // ✅ Balance
-            
-            // SIGNAL 5: VOLUME - Volume supérieur à la moyenne (FORCE réelle)
-            // Pour tokens custom, volume = true automatiquement (pas de données volume)
-            if (state.selectedCrypto.startsWith('CUSTOM_')) {
-                state.signals.volume = true; // Toujours validé pour token custom
-            } else {
-                state.signals.volume = volume > volumeAvg * 1.4;
-            }
-            
-            // SIGNAL 6: VOLATILITÉ - ATR dans une zone acceptable
-            const atrPct = (atr / state.currentPrice) * 100;
-            state.signals.volatility = atrPct > 0.9 && atrPct < 4.5; // ✅ Balance
-            
-            updateSignalUI('trend', state.signals.trend, `${ema9.toFixed(2)}`);
-            updateSignalUI('rsi', state.signals.rsi, `${rsi.toFixed(1)}`);
-            updateSignalUI('macd', state.signals.macd, `${macdHist.toFixed(4)}`);
-            updateSignalUI('bollinger', state.signals.bollinger, `${distBB.toFixed(2)}%`);
-            updateSignalUI('volume', state.signals.volume, `${volumeAvg > 0 ? (volume / volumeAvg * 100).toFixed(0) : 100}%`);
-            updateSignalUI('volatility', state.signals.volatility, `${atrPct.toFixed(2)}%`);
-            
-            const signals = Object.values(state.signals);
-            const score = Math.round((signals.filter(s => s).length / signals.length) * 100);
-            const minScore = parseInt(document.getElementById('minScore').value);
-            
-            document.getElementById('signal-score').textContent = score + '%';
-            document.getElementById('signal-progress').style.width = score + '%';
-            document.getElementById('signal-status').textContent = score >= minScore ? '✅ Signal BUY!' : `⏳ ${score}%`;
-        }
-
-        function updateSignalUI(name, isValid, value) {
-            const icon = document.getElementById(`signal-${name}-icon`);
-            const display = document.getElementById(`${name}-display`);
-            const container = document.getElementById(`signal-${name}`);
-            if (icon) icon.textContent = isValid ? '✅' : '⚪';
-            if (display) display.textContent = value;
-            if (container) {
-                container.className = isValid ? 'bg-green-500/30 border-2 border-green-500 rounded-lg p-3' : 'glass-effect border-2 border-slate-600 rounded-lg p-3';
-            }
-        }
-
-        function updateChart() {
-            if (!chart || state.priceHistory.length === 0) return;
-            const maxPoints = 50;
-            const prices = state.priceHistory.slice(-maxPoints);
-            const labels = prices.map((_, i) => {
-                const date = new Date(Date.now() - (maxPoints - i) * 10000);
-                return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-            });
-            chart.data.labels = labels;
-            chart.data.datasets[0].data = prices;
-            chart.update('none');
         }
 
         function setCapital() {
@@ -1103,597 +537,56 @@
             state.initialCapital = cap;
             state.capitalSet = true;
             debugLog(`✅ Capital: ${cap} USDT`, 'success');
+            
+            document.getElementById('capitalSection').classList.add('hidden');
+            document.getElementById('statsCards').classList.remove('hidden');
+            document.getElementById('capitalDisplay').textContent = cap.toFixed(2);
+            document.getElementById('toggleBotBtn').disabled = false;
+            document.getElementById('toggleBotBtn').className = 'flex items-center gap-2 px-6 py-3 rounded-xl font-semibold bg-green-600 hover:bg-green-700';
+            
             updateUI();
-            saveState();
-            alert(`✅ Capital: ${cap} USDT`);
-        }
-
-        function changeCapital() {
-            if (state.botRunning) {
-                alert('❌ Arrêtez le bot avant de changer le capital!');
-                return;
-            }
-            
-            const newCap = parseFloat(document.getElementById('newCapitalInput').value);
-            if (!newCap || newCap <= 0) {
-                alert('❌ Montant invalide');
-                return;
-            }
-            
-            if (state.currentPosition) {
-                alert('❌ Fermez votre position avant de changer le capital!');
-                return;
-            }
-            
-            const oldCap = state.tradingCapital;
-            state.tradingCapital = newCap;
-            state.initialCapital = newCap;
-            
-            debugLog(`🔄 Capital changé: ${oldCap.toFixed(2)} → ${newCap.toFixed(2)} USDT`, 'warning');
-            
-            document.getElementById('newCapitalInput').value = '';
-            updateUI();
-            saveState();
-            
-            alert(`✅ Capital mis à jour!\n\nAncien: ${oldCap.toFixed(2)} USDT\nNouveau: ${newCap.toFixed(2)} USDT`);
         }
 
         function toggleBot() {
-            if (!state.isConnected) {
-                alert('❌ Connectez wallet');
-                return;
-            }
-            if (!state.capitalSet) {
-                alert('❌ Définissez capital');
-                return;
-            }
             state.botRunning = !state.botRunning;
             if (state.botRunning) {
-                startBot();
+                debugLog('🚀 BOT DÉMARRÉ', 'success');
+                if (state.jercatTrusted) {
+                    debugLog('🤖 Mode AUTO-VALIDATION: Trades sans confirmation', 'success');
+                }
             } else {
-                stopBot();
-            }
-            updateUI();
-        }
-
-        function startBot() {
-            debugLog('🚀 BOT DÉMARRÉ', 'success');
-            debugLog(`💰 Capital: ${state.tradingCapital} USDT`, 'info');
-            debugLog(`📊 Mode: ${state.tradingMode}`, 'warning');
-            
-            botInterval = setInterval(() => {
-                if (state.priceHistory.length < 50) {
-                    debugLog(`⏳ Collecte: ${state.priceHistory.length}/50`, 'warning');
-                    return;
-                }
-                
-                updateIndicators();
-                const signal = getTradeSignal();
-                
-                if (signal.signal) {
-                    executeTrade(signal.signal, signal.score, signal.reason);
-                }
-            }, 3000);
-        }
-
-        function stopBot() {
-            if (botInterval) {
-                clearInterval(botInterval);
-                botInterval = null;
                 debugLog('🛑 BOT ARRÊTÉ', 'warning');
-                const ret = ((state.tradingCapital - state.initialCapital) / state.initialCapital * 100);
-                debugLog(`📊 Performance: ${ret >= 0 ? '+' : ''}${ret.toFixed(2)}%`, ret >= 0 ? 'success' : 'error');
             }
-        }
-
-        function getTradeSignal() {
-            const minScore = parseInt(document.getElementById('minScore').value);
-            
-            if (!state.currentPosition) {
-                const signals = Object.values(state.signals);
-                const score = Math.round((signals.filter(s => s).length / signals.length) * 100);
-                if (score >= minScore) {
-                    const reasons = [];
-                    if (state.signals.trend) reasons.push('EMA↑');
-                    if (state.signals.rsi) reasons.push(`RSI:${state.indicators.rsi.toFixed(0)}`);
-                    if (state.signals.macd) reasons.push('MACD✓');
-                    return { signal: 'BUY', score, reason: reasons.join('|') };
-                }
-                return { signal: null, score: 0 };
-            } else {
-                // CALCUL DU PROFIT RÉEL (prix actuel vs prix d'achat)
-                const profitPct = ((state.currentPrice - state.lastBuyPrice) / state.lastBuyPrice) * 100;
-                
-                // TP/SL FIXES (valeurs par défaut de l'interface)
-                const tpMult = parseFloat(document.getElementById('tpMultiplier').value); // 3 par défaut
-                const slMult = parseFloat(document.getElementById('slMultiplier').value); // 1.5 par défaut
-                
-                // FRAIS ESTIMÉS (0.25% swap × 2 + gas)
-                // Pour un trade de 10 USDT: 0.025 + 0.025 + 0.30 gas ≈ 0.35 USDT = 3.5%
-                // Donc on ajoute ~0.5% de marge pour les frais
-                const feesMargin = 0.5; // 0.5% de marge pour frais réseau
-                
-                // TP = 3% + 0.5% frais = 3.5% minimum
-                const dynamicTP = tpMult + feesMargin;
-                // SL = -1.5% - 0.5% frais = -2% maximum
-                const dynamicSL = -(slMult + feesMargin);
-                
-                // STOP LOSS : Vendre si perte >= 1.5% + frais
-                if (profitPct <= dynamicSL) {
-                    return { signal: 'SELL', score: 100, reason: `SL ${dynamicSL.toFixed(2)}%` };
-                }
-                
-                // TAKE PROFIT : Vendre si profit >= 3% + frais
-                if (profitPct >= dynamicTP) {
-                    return { signal: 'SELL', score: 100, reason: `TP +${dynamicTP.toFixed(2)}%` };
-                }
-                
-                // SÉCURITÉ RSI : Vendre si RSI très haut (surachat) et profit > 0.5%
-                // RSI > 68 = Début de surachat, sortir AVANT que ça redescende!
-                if (state.indicators.rsi > 68 && profitPct > 0.3) {
-                    return { signal: 'SELL', score: 100, reason: `RSI:${state.indicators.rsi.toFixed(0)}` };
-                }
-                
-                return { signal: null, score: 0 };
-            }
-        }
-
-        async function executeTrade(tradeType, score, reason) {
-            if (state.isTrading) {
-                debugLog('⏳ Trade en cours, veuillez patienter...', 'warning');
-                return;
-            }
-            
-            const now = Date.now();
-            const timeSinceLastTrade = (now - state.lastTradeTime) / 1000;
-            if (timeSinceLastTrade < 60 && state.lastTradeTime > 0) {
-                debugLog(`⏳ Cooldown: ${(60 - timeSinceLastTrade).toFixed(0)}s (évite trop de frais gas)`, 'warning');
-                return;
-            }
-            
-            const percent = parseFloat(document.getElementById('tradePercent').value);
-            const tradeAmount = (state.tradingCapital * percent) / 100;
-            
-            debugLog(`💰 Montant calculé: ${tradeAmount.toFixed(2)} USDT (${percent}%)`, 'info');
-            
-            // AVERTISSEMENT : Montant trop petit = frais trop élevés
-            if (tradeAmount < 15) {
-                debugLog(`⚠️ ATTENTION: Montant trop petit (${tradeAmount.toFixed(2)} USDT)!`, 'warning');
-                debugLog(`⚠️ Les frais gas (~$0.20) vont manger le profit!`, 'warning');
-                debugLog(`💡 Conseil: Augmentez le % à 15% minimum`, 'warning');
-            }
-            
-            if (tradeType === 'BUY') {
-                if (tradeAmount > state.tradingCapital) {
-                    debugLog(`❌ Capital insuffisant: ${state.tradingCapital.toFixed(2)} USDT`, 'error');
-                    return;
-                }
-                debugLog(`✅ Capital OK: ${state.tradingCapital.toFixed(2)} USDT`, 'success');
-            }
-            
-            if (tradeType === 'BUY' && state.currentPosition) {
-                debugLog(`⚠️ Position déjà ouverte`, 'warning');
-                return;
-            }
-            
-            if (tradeType === 'SELL' && !state.currentPosition) {
-                debugLog(`⚠️ Aucune position`, 'warning');
-                return;
-            }
-            
-            state.isTrading = true;
-            
-            debugLog(`${tradeType === 'BUY' ? '🟢' : '🔴'} ${tradeType} - ${reason}`, tradeType === 'BUY' ? 'success' : 'warning');
-            debugLog(`💰 Montant: ${tradeAmount.toFixed(2)} USDT`, 'info');
-            
-            let executionPrice = state.currentPrice;
-            let netProfit = 0;
-            let actualFees = 0;
-            let tokenAddress = null; // Déclaré ici pour être accessible partout
-            
-            // MODE RÉEL - PANCAKESWAP
-            if (state.tradingMode === 'real' && state.wallet) {
-                try {
-                    const network = await state.provider.getNetwork();
-                    if (network.chainId !== 56) {
-                        debugLog(`❌ Mauvais réseau: ${network.chainId}. BSC (56) requis!`, 'error');
-                        alert('❌ Vous devez être sur le réseau BSC pour trader!');
-                        state.isTrading = false;
-                        return;
-                    }
-                    debugLog(`✅ Réseau BSC confirmé`, 'success');
-                    
-                    if (tradeType === 'BUY') {
-                        const usdtData = await getUSDTBalance(state.account, state.provider);
-                        
-                        if (usdtData.formatted < tradeAmount) {
-                            debugLog(`❌ USDT insuffisant: ${usdtData.formatted.toFixed(2)} < ${tradeAmount.toFixed(2)}`, 'error');
-                            alert(`❌ USDT insuffisant!\nVous avez: ${usdtData.formatted.toFixed(2)} USDT\nNécessaire: ${tradeAmount.toFixed(2)} USDT`);
-                            state.isTrading = false;
-                            return;
-                        }
-                        
-                        debugLog('🔄 Achat avec USDT sur PancakeSwap...', 'warning');
-                        
-                        tokenAddress = getTokenAddress(state.selectedCrypto);
-                        const amountIn = ethers.utils.parseUnits(tradeAmount.toFixed(2), usdtData.decimals);
-                        
-                        const usdtContract = new ethers.Contract(
-                            USDT,
-                            [
-                                'function approve(address spender, uint256 amount) public returns (bool)',
-                                'function allowance(address owner, address spender) view returns (uint256)'
-                            ],
-                            state.wallet
-                        );
-                        
-                        // 🔍 VÉRIFIER L'ALLOWANCE AVANT D'APPROUVER
-                        const currentAllowance = await usdtContract.allowance(state.account, PANCAKESWAP_ROUTER);
-                        debugLog(`📊 Allowance USDT actuelle: ${ethers.utils.formatUnits(currentAllowance, usdtData.decimals)} USDT`, 'info');
-                        
-                        // ✅ APPROVE SEULEMENT SI NÉCESSAIRE
-                        if (currentAllowance.lt(amountIn)) {
-                            debugLog('🔄 Approve USDT illimité (une seule fois)...', 'warning');
-                            // Approve INFINI pour éviter de refaire à chaque trade
-                            const maxApproval = ethers.constants.MaxUint256;
-                            const approveTx = await usdtContract.approve(PANCAKESWAP_ROUTER, maxApproval);
-                            await approveTx.wait();
-                            debugLog('✅ USDT approuvé infiniment! Plus besoin d\'approuver 🎉', 'success');
-                        } else {
-                            debugLog('✅ USDT déjà approuvé, pas besoin d\'approve!', 'success');
-                        }
-                        
-                        const router = new ethers.Contract(
-                            PANCAKESWAP_ROUTER,
-                            ['function swapExactTokensForTokens(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline) external returns (uint[] memory amounts)'],
-                            state.wallet
-                        );
-                        
-                        let path;
-                        if (state.selectedCrypto === 'BNBUSDT') {
-                            path = [USDT, WBNB];
-                        } else {
-                            path = [USDT, WBNB, tokenAddress];
-                        }
-                        
-                        const deadline = Math.floor(Date.now() / 1000) + 60 * 20;
-                        
-                        const tx = await router.swapExactTokensForTokens(
-                            amountIn,
-                            0,
-                            path,
-                            state.account,
-                            deadline,
-                            { gasLimit: 350000 }
-                        );
-                        
-                        debugLog(`⏳ TX: ${tx.hash.slice(0, 10)}...`, 'info');
-                        const receipt = await tx.wait();
-                        debugLog(`✅ Confirmé! Gas: ${receipt.gasUsed.toString()}`, 'success');
-                        
-                        // RÉCUPÉRER LE MONTANT DE TOKENS REÇU DEPUIS LES LOGS
-                        try {
-                            // Le dernier Transfer event contient le montant reçu
-                            const transferEvent = receipt.logs.find(log => 
-                                log.topics[0] === '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef' // Transfer signature
-                                && log.address.toLowerCase() === tokenAddress.toLowerCase()
-                            );
-                            
-                            if (transferEvent) {
-                                const tokenAmount = ethers.BigNumber.from(transferEvent.data);
-                                state.tokensBought = parseFloat(ethers.utils.formatEther(tokenAmount));
-                                debugLog(`💎 Tokens reçus (depuis event): ${state.tokensBought.toFixed(6)}`, 'success');
-                            } else {
-                                // Fallback: lire le solde
-                                const tokenContract = new ethers.Contract(
-                                    tokenAddress,
-                                    ['function balanceOf(address) view returns (uint256)'],
-                                    state.provider
-                                );
-                                const balance = await tokenContract.balanceOf(state.account);
-                                state.tokensBought = parseFloat(ethers.utils.formatEther(balance));
-                                debugLog(`💎 Tokens reçus (depuis balance): ${state.tokensBought.toFixed(6)}`, 'success');
-                            }
-                        } catch (err) {
-                            debugLog(`⚠️ Erreur lecture tokens: ${err.message}`, 'warning');
-                            state.tokensBought = tradeAmount / executionPrice;
-                        }
-                        
-                        // Calculer les frais de gas (support EIP-1559)
-                        let gasCost = 0;
-                        if (receipt.effectiveGasPrice) {
-                            // EIP-1559 transaction
-                            gasCost = parseFloat(ethers.utils.formatEther(receipt.gasUsed.mul(receipt.effectiveGasPrice)));
-                        } else if (tx.gasPrice) {
-                            // Legacy transaction
-                            gasCost = parseFloat(ethers.utils.formatEther(receipt.gasUsed.mul(tx.gasPrice)));
-                        } else {
-                            // Fallback: estimer à 5 gwei
-                            const estimatedGasPrice = ethers.utils.parseUnits('5', 'gwei');
-                            gasCost = parseFloat(ethers.utils.formatEther(receipt.gasUsed.mul(estimatedGasPrice)));
-                        }
-                        debugLog(`💸 Frais gas: ${gasCost.toFixed(6)} BNB`, 'info');
-                        
-                        actualFees = (tradeAmount * 0.0025) + (gasCost * state.currentPrice / 100);
-                        executionPrice = state.currentPrice;
-                        
-                        // IMPORTANT: Déduire le montant du capital
-                        state.tradingCapital -= tradeAmount;
-                        debugLog(`💰 Capital après achat: ${state.tradingCapital.toFixed(2)} USDT`, 'info');
-                        
-                    } else {
-                        debugLog('🔄 Vente Token → USDT...', 'warning');
-                        
-                        tokenAddress = getTokenAddress(state.selectedCrypto); // Pas de const ici!
-                        
-                        // CORRECTION CRITIQUE: Utiliser le montant réel de tokens acheté
-                        let tokenAmount = state.tokensBought || (state.positionAmount / state.lastBuyPrice);
-                        
-                        debugLog(`💎 Vente de ${tokenAmount.toFixed(6)} tokens`, 'info');
-                        
-                        const amountIn = ethers.utils.parseUnits(tokenAmount.toFixed(8), 18);
-                        
-                        const tokenContract = new ethers.Contract(
-                            tokenAddress,
-                            [
-                                'function approve(address spender, uint256 amount) public returns (bool)',
-                                'function allowance(address owner, address spender) view returns (uint256)'
-                            ],
-                            state.wallet
-                        );
-                        
-                        // 🔍 VÉRIFIER L'ALLOWANCE AVANT D'APPROUVER
-                        const currentAllowance = await tokenContract.allowance(state.account, PANCAKESWAP_ROUTER);
-                        debugLog(`📊 Allowance Token actuelle: ${ethers.utils.formatEther(currentAllowance)} tokens`, 'info');
-                        
-                        // ✅ APPROVE SEULEMENT SI NÉCESSAIRE
-                        if (currentAllowance.lt(amountIn)) {
-                            debugLog('🔄 Approve Token illimité (une seule fois)...', 'warning');
-                            // Approve INFINI pour éviter de refaire à chaque trade
-                            const maxApproval = ethers.constants.MaxUint256;
-                            const approveTx = await tokenContract.approve(PANCAKESWAP_ROUTER, maxApproval);
-                            await approveTx.wait();
-                            debugLog('✅ Token approuvé infiniment! Plus besoin d\'approuver 🎉', 'success');
-                        } else {
-                            debugLog('✅ Token déjà approuvé, pas besoin d\'approve!', 'success');
-                        }
-                        
-                        const router = new ethers.Contract(
-                            PANCAKESWAP_ROUTER,
-                            ['function swapExactTokensForTokens(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline) external returns (uint[] memory amounts)'],
-                            state.wallet
-                        );
-                        
-                        let path;
-                        if (state.selectedCrypto === 'BNBUSDT') {
-                            path = [WBNB, USDT];
-                        } else {
-                            path = [tokenAddress, WBNB, USDT];
-                        }
-                        
-                        const deadline = Math.floor(Date.now() / 1000) + 60 * 20;
-                        
-                        const tx = await router.swapExactTokensForTokens(
-                            amountIn,
-                            0,
-                            path,
-                            state.account,
-                            deadline,
-                            { gasLimit: 350000 }
-                        );
-                        
-                        debugLog(`⏳ TX: ${tx.hash.slice(0, 10)}...`, 'info');
-                        const receipt = await tx.wait();
-                        debugLog(`✅ Vendu! Gas: ${receipt.gasUsed.toString()}`, 'success');
-                        
-                        // Calculer les frais de gas (support EIP-1559)
-                        let gasCost = 0;
-                        if (receipt.effectiveGasPrice) {
-                            // EIP-1559 transaction
-                            gasCost = parseFloat(ethers.utils.formatEther(receipt.gasUsed.mul(receipt.effectiveGasPrice)));
-                        } else if (tx.gasPrice) {
-                            // Legacy transaction
-                            gasCost = parseFloat(ethers.utils.formatEther(receipt.gasUsed.mul(tx.gasPrice)));
-                        } else {
-                            // Fallback: estimer à 5 gwei
-                            const estimatedGasPrice = ethers.utils.parseUnits('5', 'gwei');
-                            gasCost = parseFloat(ethers.utils.formatEther(receipt.gasUsed.mul(estimatedGasPrice)));
-                        }
-                        debugLog(`💸 Frais gas: ${gasCost.toFixed(6)} BNB`, 'info');
-                        
-                        actualFees = (tradeAmount * 0.0025) + (gasCost * state.currentPrice / 100); // Convertir BNB en USDT approx
-                        executionPrice = state.currentPrice;
-                    }
-                } catch (error) {
-                    debugLog(`❌ Erreur swap: ${error.message}`, 'error');
-                    state.isTrading = false;
-                    return;
-                }
-                
-                debugLog(`✅ Swap terminé! Mode: RÉEL`, 'success');
-            } else {
-                // MODE SIMULATION
-                if (tradeType === 'BUY') {
-                    actualFees = tradeAmount * 0.0025 + 0.30;
-                    
-                    if (tradeAmount > state.tradingCapital) {
-                        debugLog(`❌ Capital insuffisant: ${state.tradingCapital.toFixed(2)} < ${tradeAmount.toFixed(2)}`, 'error');
-                        state.isTrading = false;
-                        return;
-                    }
-                    
-                    state.tradingCapital -= tradeAmount;
-                    const slippage = Math.random() * 0.01;
-                    executionPrice = state.currentPrice * (1 + slippage);
-                    
-                    debugLog(`📊 Frais estimés: ${actualFees.toFixed(2)} USDT`, 'info');
-                    debugLog(`💰 Capital restant: ${state.tradingCapital.toFixed(2)} USDT`, 'info');
-                } else {
-                    actualFees = tradeAmount * 0.0025 + 0.30;
-                    const slippage = Math.random() * 0.01;
-                    executionPrice = state.currentPrice * (1 - slippage);
-                }
-            }
-            
-            if (tradeType === 'BUY') {
-                state.currentPosition = 'BUY';
-                state.lastBuyPrice = executionPrice;
-                state.positionAmount = tradeAmount - actualFees; // En USDT
-                state.tokensBought = 0; // Sera calculé après le swap
-                state.entryFees = actualFees;
-                
-                debugLog(`📈 POSITION OUVERTE`, 'success');
-                debugLog(`💵 Net: ${state.positionAmount.toFixed(2)} USDT`, 'info');
-                debugLog(`💰 Capital libre: ${state.tradingCapital.toFixed(2)} USDT`, 'info');
-                
-            } else {
-                const profitPct = ((executionPrice - state.lastBuyPrice) / state.lastBuyPrice) * 100;
-                const grossProfit = state.positionAmount * (profitPct / 100);
-                netProfit = grossProfit - actualFees - state.entryFees;
-                const totalFees = actualFees + state.entryFees;
-                
-                state.tradingCapital += state.positionAmount + grossProfit - actualFees;
-                
-                debugLog(`📉 POSITION FERMÉE`, netProfit >= 0 ? 'success' : 'error');
-                debugLog(`💰 Profit brut: ${grossProfit.toFixed(2)} USDT`, 'info');
-                debugLog(`💸 Frais: ${totalFees.toFixed(2)} USDT`, 'warning');
-                debugLog(`💎 NET: ${netProfit >= 0 ? '+' : ''}${netProfit.toFixed(2)} USDT`, netProfit >= 0 ? 'success' : 'error');
-                debugLog(`💰 Capital total: ${state.tradingCapital.toFixed(2)} USDT`, 'info');
-                
-                state.currentPosition = null;
-                state.tokensBought = 0;
-                state.entryFees = 0;
-                
-                if (netProfit > 0) state.portfolio.wins++;
-                else state.portfolio.losses++;
-                
-                const netProfitPct = (netProfit / state.positionAmount) * 100;
-                if (netProfitPct > state.portfolio.bestTrade) state.portfolio.bestTrade = netProfitPct;
-                if (netProfitPct < state.portfolio.worstTrade) state.portfolio.worstTrade = netProfitPct;
-                state.portfolio.profit += netProfit;
-            }
-            
-            debugLog(`📝 Création du trade dans l'historique...`, 'info');
-            const newTrade = {
-                id: Date.now(),
-                time: new Date().toLocaleTimeString('fr-FR'),
-                type: tradeType,
-                crypto: state.selectedCrypto, // Ajouter le crypto tradé
-                amount: tradeAmount.toFixed(2),
-                price: executionPrice.toFixed(2),
-                profit: netProfit.toFixed(2),
-                profitPct: tradeType === 'SELL' ? ((netProfit / state.positionAmount) * 100).toFixed(2) : '0',
-                fees: actualFees.toFixed(2),
-                reason: reason,
-                score: score
-            };
-            
-            state.trades.unshift(newTrade);
-            state.trades = state.trades.slice(0, 20);
-            
-            // STATS PAR TOKEN
-            if (tradeType === 'SELL') {
-                const crypto = state.selectedCrypto;
-                if (!state.tokenStats[crypto]) {
-                    state.tokenStats[crypto] = { trades: 0, profit: 0, wins: 0, losses: 0 };
-                }
-                state.tokenStats[crypto].trades++;
-                state.tokenStats[crypto].profit += netProfit;
-                if (netProfit > 0) state.tokenStats[crypto].wins++;
-                else state.tokenStats[crypto].losses++;
-            }
-            
-            debugLog(`✅ Trade ajouté à l'historique (ID: ${newTrade.id})`, 'success');
-            debugLog(`📊 Total trades: ${state.trades.length}`, 'info');
-            
-            state.isTrading = false;
-            state.lastTradeTime = Date.now();
-            
-            debugLog(`🎨 Mise à jour de l'interface...`, 'info');
-            renderTrades();
-            updateChart();
             updateUI();
-            saveState();
-            debugLog(`✅ Interface mise à jour!`, 'success');
-        }
-
-        function renderTrades() {
-            if (state.trades.length === 0) return;
-            document.getElementById('tradesContainer').innerHTML = state.trades.map(t => {
-                const cryptoName = t.crypto ? t.crypto.replace('USDT', '') : 'Unknown';
-                return `
-                <div class="flex justify-between p-3 glass-effect rounded-lg mb-2 border-l-4 ${t.type === 'BUY' ? 'border-green-500' : 'border-red-500'}">
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <span class="${t.type === 'BUY' ? 'text-green-400' : 'text-red-400'} text-xl">${t.type === 'BUY' ? '🟢' : '🔴'}</span>
-                            <span class="font-bold">${t.type}</span>
-                            <span class="text-xs bg-blue-400/20 px-2 py-1 rounded font-bold">${cryptoName}</span>
-                            <span class="text-xs bg-purple-400/20 px-2 py-1 rounded">${t.reason}</span>
-                        </div>
-                        <p class="text-xs text-gray-400 mt-1">${t.time}</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-sm font-mono">$${t.price}</p>
-                        ${t.type === 'SELL' ? `
-                            <p class="text-lg font-bold ${parseFloat(t.profit) >= 0 ? 'text-green-400' : 'text-red-400'}">
-                                ${parseFloat(t.profit) >= 0 ? '+' : ''}$${t.profit}
-                            </p>
-                            <p class="text-xs text-gray-400">Frais: $${t.fees}</p>
-                        ` : '<p class="text-sm text-green-400">Ouvert</p>'}
-                    </div>
-                </div>
-            `}).join('');
         }
 
         function updateUI() {
             if (state.isConnected) {
                 document.getElementById('connectBtn').className = 'flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all bg-green-600 hover:bg-green-700 shadow-lg';
                 document.getElementById('walletText').textContent = `${state.account.slice(0, 6)}...`;
-                document.getElementById('walletStatus').innerHTML = state.connectionMethod === 'privatekey' ? '🔴 Clé' : '🟢 MetaMask';
-            }
-            
-            if (state.capitalSet) {
-                // Masquer la section de définition initiale
-                document.getElementById('capitalSection').classList.add('hidden');
-                // Afficher la section de modification
-                document.getElementById('changeCapitalSection').classList.remove('hidden');
-                // Afficher les stats
-                document.getElementById('statsCards').classList.remove('hidden');
                 
-                // Mettre à jour l'affichage du capital actuel
-                document.getElementById('currentCapitalDisplay').textContent = state.tradingCapital.toFixed(2);
-                
-                // Afficher le capital RÉEL
-                document.getElementById('capitalDisplay').textContent = state.tradingCapital.toFixed(2);
-                document.getElementById('toggleBotBtn').disabled = false;
-                document.getElementById('toggleBotBtn').className = state.botRunning ?
-                    'flex items-center gap-2 px-6 py-3 rounded-xl font-semibold bg-red-600 hover:bg-red-700' :
-                    'flex items-center gap-2 px-6 py-3 rounded-xl font-semibold bg-green-600 hover:bg-green-700';
+                if (state.jercatTrusted) {
+                    document.getElementById('walletStatus').innerHTML = '<span style="color: #10b981;">🟢 JERCAT Auto ✅</span>';
+                } else {
+                    document.getElementById('walletStatus').innerHTML = state.connectionMethod === 'privatekey' ? '<span style="color: #f59e0b;">🔴 Clé</span>' : '<span style="color: #10b981;">🟢 MetaMask</span>';
+                }
             }
             
             if (state.botRunning) {
                 document.getElementById('botIcon').textContent = '⏸️';
                 document.getElementById('botText').textContent = 'Stop';
+                document.getElementById('toggleBotBtn').className = 'flex items-center gap-2 px-6 py-3 rounded-xl font-semibold bg-red-600 hover:bg-red-700';
             } else {
                 document.getElementById('botIcon').textContent = '▶️';
                 document.getElementById('botText').textContent = 'Start';
+                if (state.capitalSet) {
+                    document.getElementById('toggleBotBtn').className = 'flex items-center gap-2 px-6 py-3 rounded-xl font-semibold bg-green-600 hover:bg-green-700';
+                }
             }
             
-            document.getElementById('modeStatus').innerHTML = state.tradingMode === 'real' ? '💎 RÉEL' : '🎮 SIM';
-            
-            if (state.currentPosition) {
-                const pct = ((state.currentPrice - state.lastBuyPrice) / state.lastBuyPrice) * 100;
-                document.getElementById('positionStatus').innerHTML = `🟢 ${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%`;
-            } else {
-                document.getElementById('positionStatus').innerHTML = '⚪ None';
-            }
-            
+            document.getElementById('modeStatus').innerHTML = state.tradingMode === 'real' ? '<span style="color: #f59e0b;">💎 RÉEL</span>' : '<span class="text-gray-400">🎮 SIM</span>';
             document.getElementById('profitDisplay').textContent = state.portfolio.profit.toFixed(2);
             document.getElementById('tradesCount').textContent = state.trades.length;
-            
-            const wr = state.portfolio.wins + state.portfolio.losses > 0 ?
-                Math.round(state.portfolio.wins / (state.portfolio.wins + state.portfolio.losses) * 100) : 0;
-            document.getElementById('winRateDisplay').textContent = wr + '%';
         }
     </script>
 </body>
