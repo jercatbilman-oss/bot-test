@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🤖 JERCAT Trading Bot - Wallet Auto-Mode RÉEL</title>
+    <title>🤖 JERCAT Trading Bot - Wallet Auto-Mode RÉEL (USDT)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -45,6 +45,9 @@
                     </p>
                     <p class="text-green-400 font-bold text-sm mt-2">
                         ✅ AUTO-VALIDATION JERCAT - Transactions automatiques sans confirmation
+                    </p>
+                    <p class="text-yellow-400 font-bold text-sm mt-1">
+                        💵 TRADING EN USDT (au lieu de BNB)
                     </p>
                 </div>
                 
@@ -102,6 +105,7 @@
             </div>
             <div id="debugConsole" class="bg-black/70 rounded-lg p-4 h-48 overflow-y-auto font-mono text-xs" style="border: 1px solid #f59e0b;">
                 <p style="color: #f59e0b;">✅ JERCAT Bot initialisé - Auto-validation activée</p>
+                <p style="color: #10b981;">💵 Mode USDT activé (trading USDT → Tokens)</p>
             </div>
         </div>
 
@@ -118,7 +122,7 @@
                 <div>
                     <label class="block text-sm text-gray-400 mb-2">Mode Trading</label>
                     <div class="w-full glass-effect rounded-lg px-4 py-3 border-2 text-lg font-semibold text-center" style="border-color: #f59e0b; background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(249, 115, 22, 0.2));">
-                        <span style="color: #f59e0b;">🤖 JERCAT AUTO-TRADING RÉEL</span>
+                        <span style="color: #f59e0b;">🤖 JERCAT AUTO-TRADING RÉEL (USDT)</span>
                     </div>
                 </div>
             </div>
@@ -159,7 +163,7 @@
 
         <!-- Capital -->
         <div id="capitalSection" class="glass-effect rounded-xl p-6 mb-6 border-2" style="border-color: #f59e0b;">
-            <h3 class="text-xl font-bold mb-4" style="color: #f59e0b;">💰 Capital</h3>
+            <h3 class="text-xl font-bold mb-4" style="color: #f59e0b;">💰 Capital (USDT)</h3>
             <div class="flex gap-4">
                 <input type="number" id="capitalInput" placeholder="Ex: 100" value="100" class="flex-1 glass-effect rounded-lg px-4 py-3 focus:outline-none border-2 border-gray-600 text-white">
                 <button onclick="setCapital()" class="px-8 py-3 rounded-lg font-semibold" style="background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%); color: #000;">
@@ -172,7 +176,7 @@
         <div id="statsCards" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div class="glass-effect rounded-xl p-4 border-2" style="border-color: #f59e0b;">
                 <p class="text-xs text-gray-400">Capital</p>
-                <p class="text-2xl font-bold" style="color: #f59e0b;">$<span id="capitalDisplay">0</span></p>
+                <p class="text-2xl font-bold" style="color: #f59e0b;"><span id="capitalDisplay">0</span> USDT</p>
             </div>
             
             <div class="glass-effect rounded-xl p-4 border border-gray-500">
@@ -182,7 +186,7 @@
             
             <div class="glass-effect rounded-xl p-4 border border-gray-500">
                 <p class="text-xs text-gray-400">Profit</p>
-                <p class="text-2xl font-bold text-green-400">$<span id="profitDisplay">0</span></p>
+                <p class="text-2xl font-bold text-green-400"><span id="profitDisplay">0</span> USDT</p>
             </div>
             
             <div class="glass-effect rounded-xl p-4 border border-gray-500">
@@ -342,7 +346,6 @@
             'https://bsc-dataseed1.defibit.io'
         ];
         
-        // 🔥 FIX: Variables manquantes ajoutées
         let state = {
             account: null,
             wallet: null,
@@ -357,7 +360,7 @@
             tradingCapital: 0,
             initialCapital: 0,
             capitalSet: false,
-            tradingMode: 'real',  // 🔥 FORCÉ EN MODE RÉEL
+            tradingMode: 'real',
             botRunning: false,
             isTrading: false,
             trades: [],
@@ -370,10 +373,10 @@
             positionAmount: 0,
             entryFees: 0,
             minProfitPct: 3.0,
-            jercatTrusted: false
+            jercatTrusted: false,
+            usdtBalance: 0
         };
 
-        // 🚨 VÉRIFICATION MODE RÉEL
         function verifyRealMode() {
             if (!state.isConnected || !state.wallet) {
                 alert('⚠️ ERREUR: Wallet non connecté!\n\nCe bot fonctionne uniquement en MODE RÉEL.\nConnectez votre wallet MetaMask ou utilisez votre clé privée.');
@@ -390,6 +393,12 @@
         
         const WBNB = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c';
         const USDT = '0x55d398326f99059fF775485246999027B3197955';
+        
+        const USDT_ABI = [
+            'function approve(address spender, uint256 amount) external returns (bool)',
+            'function balanceOf(address account) view returns (uint256)',
+            'function decimals() view returns (uint8)'
+        ];
         
         function getTokenAddress(symbol) {
             if (symbol && symbol.startsWith('CUSTOM_') && state.customToken) {
@@ -524,15 +533,15 @@
         }
 
         function clearDebugLog() {
-            document.getElementById('debugConsole').innerHTML = '<p style="color: #f59e0b;">✅ Console effacée - JERCAT Bot actif</p>';
+            document.getElementById('debugConsole').innerHTML = '<p style="color: #f59e0b;">✅ Console effacée - JERCAT Bot actif</p><p style="color: #10b981;">💵 Mode USDT activé</p>';
         }
 
         window.addEventListener('DOMContentLoaded', () => {
             debugLog('🤖 JERCAT Trading Bot initialisé', 'success');
             debugLog('🎯 Profit minimum: 3%', 'success');
+            debugLog('💵 Mode USDT activé', 'success');
             debugLog('🔗 Intégration JERCAT Wallet active', 'info');
             
-            // 🔥 AUTO-ACTIVATION JERCAT WALLET
             if (document.referrer.includes('wallet-one-ochre.vercel.app') || 
                 document.referrer.includes('jercat-wallet') ||
                 document.referrer.includes('localhost')) {
@@ -713,7 +722,6 @@
         }
 
         function changeTradingMode() {
-            // MODE RÉEL UNIQUEMENT - Pas de changement possible
             state.tradingMode = 'real';
             debugLog('🔒 Mode RÉEL fixe activé', 'warning');
         }
@@ -816,7 +824,6 @@
             state.indicators.rsi = calculateRSI(state.priceHistory, 14);
             
             const macd = calculateMACD(state.priceHistory);
-            // ✅ FIX: Sauvegarde correcte de lastMacdHist
             state.lastMacdHist = state.indicators.macdHist || 0;
             state.indicators.macd = macd.macd;
             state.indicators.macdHist = macd.hist;
@@ -839,7 +846,6 @@
             
             state.signals.trend = ema9 > ema21 && ema21 > ema50;
             state.signals.rsi = rsi >= 25 && rsi <= 45;
-            // ✅ FIX: Utilisation correcte de state.lastMacdHist
             state.signals.macd = macdHist > 0 && state.lastMacdHist <= 0;
             
             const distBB = ((state.currentPrice - bbLower) / bbLower) * 100;
@@ -921,13 +927,12 @@
         }
 
         function startBot() {
-            // 🚨 VÉRIFICATION MODE RÉEL
             if (!verifyRealMode()) {
                 return;
             }
             
             debugLog('🚀 BOT DÉMARRÉ - MODE RÉEL', 'success');
-            debugLog(`💰 Capital: ${state.tradingCapital} BNB`, 'info');
+            debugLog(`💰 Capital: ${state.tradingCapital} USDT`, 'info');
             debugLog(`⚠️ TRANSACTIONS BLOCKCHAIN RÉELLES!`, 'warning');
             if (state.jercatTrusted) {
                 debugLog('🤖 Mode AUTO-VALIDATION: Trades sans confirmation', 'success');
@@ -942,7 +947,6 @@
                 updateIndicators();
                 const signal = getTradeSignal();
                 
-                // ✅ FIX: Utilisation correcte de state.isTrading
                 if (signal.signal && !state.isTrading) {
                     executeTrade(signal.signal, signal.score, signal.reason);
                 }
@@ -1014,7 +1018,6 @@
             let netProfit = 0;
             let actualFees = 0;
             
-            // 🔥 MODE RÉEL UNIQUEMENT - Vérification wallet
             if (!state.isConnected || !state.wallet) {
                 debugLog(`❌ ERREUR: Wallet non connecté!`, 'error');
                 alert('⚠️ Connectez votre wallet pour trader en MODE RÉEL');
@@ -1023,7 +1026,6 @@
             }
             
             try {
-                // 🔥 VÉRIFIER LE NETWORK BSC
                 const network = await state.provider.getNetwork();
                 if (network.chainId !== 56) {
                     debugLog(`❌ ERREUR: Mauvais network! ChainID: ${network.chainId}`, 'error');
@@ -1032,78 +1034,81 @@
                     return;
                 }
                 
-                // 🔥 VÉRIFIER LA BALANCE BNB
-                const balance = await state.provider.getBalance(state.account);
-                const bnbBalance = parseFloat(ethers.utils.formatEther(balance));
+                // 💵 VÉRIFIER LA BALANCE USDT
+                const usdtContract = new ethers.Contract(USDT, USDT_ABI, state.provider);
+                const usdtBalance = await usdtContract.balanceOf(state.account);
+                const usdtBalanceFormatted = parseFloat(ethers.utils.formatUnits(usdtBalance, 18));
                 
-                debugLog(`💰 Balance BNB: ${bnbBalance.toFixed(4)} BNB`, 'info');
+                debugLog(`💰 Balance USDT: ${usdtBalanceFormatted.toFixed(2)} USDT`, 'info');
+                state.usdtBalance = usdtBalanceFormatted;
                 
                 if (tradeType === 'BUY') {
-                    // Vérifier si on a assez de BNB pour le trade + gas
-                    const estimatedGas = 0.002; // Estimation gas ~0.002 BNB
-                    const totalNeeded = tradeAmount + estimatedGas;
-                    
-                    if (bnbBalance < totalNeeded) {
-                        debugLog(`❌ Balance insuffisante!`, 'error');
-                        debugLog(`💰 Requis: ${totalNeeded.toFixed(4)} BNB`, 'error');
-                        debugLog(`💰 Disponible: ${bnbBalance.toFixed(4)} BNB`, 'error');
-                        alert(`❌ Balance insuffisante!\n\nTrade: ${tradeAmount.toFixed(4)} BNB\nGas estimé: ${estimatedGas.toFixed(4)} BNB\nTotal requis: ${totalNeeded.toFixed(4)} BNB\n\nVotre balance: ${bnbBalance.toFixed(4)} BNB\n\n💡 Réduisez votre capital ou le % par trade!`);
+                    if (usdtBalanceFormatted < tradeAmount) {
+                        debugLog(`❌ Balance USDT insuffisante!`, 'error');
+                        debugLog(`💰 Requis: ${tradeAmount.toFixed(2)} USDT`, 'error');
+                        debugLog(`💰 Disponible: ${usdtBalanceFormatted.toFixed(2)} USDT`, 'error');
+                        alert(`❌ Balance USDT insuffisante!\n\nTrade: ${tradeAmount.toFixed(2)} USDT\nDisponible: ${usdtBalanceFormatted.toFixed(2)} USDT\n\n💡 Réduisez votre capital ou le % par trade!`);
                         state.isTrading = false;
                         return;
                     }
                 }
                 
                 debugLog('🔗 Exécution BLOCKCHAIN sur BSC...', 'warning');
-                debugLog(`💰 Montant du trade: ${tradeAmount.toFixed(4)} BNB`, 'info');
+                debugLog(`💰 Montant du trade: ${tradeAmount.toFixed(2)} USDT`, 'info');
                 
                 const tokenAddress = getTokenAddress(state.selectedCrypto);
-                const amountInWei = ethers.utils.parseEther(tradeAmount.toFixed(6));
+                const amountInWei = ethers.utils.parseUnits(tradeAmount.toFixed(6), 18);
                 
                 const PANCAKE_ROUTER = '0x10ED43C718714eb63d5aA57B78B54704E256024E';
-                const WBNB = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c';
                 
                 if (tradeType === 'BUY') {
-                    debugLog('💰 Achat via PancakeSwap...', 'info');
+                    debugLog('💰 Achat via PancakeSwap (USDT → Token)...', 'info');
                     debugLog(`🎯 Token: ${tokenAddress}`, 'info');
                     
+                    // 1️⃣ Approuver USDT pour le router
+                    debugLog('📝 Approbation USDT...', 'info');
+                    const usdtContractSigner = new ethers.Contract(USDT, USDT_ABI, state.wallet);
+                    const approveTx = await usdtContractSigner.approve(PANCAKE_ROUTER, amountInWei);
+                    debugLog(`⏳ Approbation: ${approveTx.hash.slice(0, 10)}...`, 'info');
+                    await approveTx.wait();
+                    debugLog(`✅ USDT approuvé`, 'success');
+                    
+                    // 2️⃣ Swap USDT → Token
                     const routerABI = [
-                        'function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) external payable returns (uint[] memory amounts)'
+                        'function swapExactTokensForTokens(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline) external returns (uint[] memory amounts)'
                     ];
                     
                     const router = new ethers.Contract(PANCAKE_ROUTER, routerABI, state.wallet);
                     
-                    const path = [WBNB, tokenAddress];
+                    const path = [USDT, tokenAddress];
                     const deadline = Math.floor(Date.now() / 1000) + 60 * 20;
-                    const amountOutMin = 0; // Accepter tout slippage (à ajuster si nécessaire)
+                    const amountOutMin = 0;
                     
-                    debugLog('📝 Préparation de la transaction...', 'info');
+                    debugLog('📝 Préparation du swap USDT → Token...', 'info');
                     
-                    // Estimer le gas
                     let gasLimit;
                     try {
-                        const estimatedGas = await router.estimateGas.swapExactETHForTokens(
+                        const estimatedGas = await router.estimateGas.swapExactTokensForTokens(
+                            amountInWei,
                             amountOutMin,
                             path,
                             state.account,
-                            deadline,
-                            { value: amountInWei }
+                            deadline
                         );
-                        gasLimit = estimatedGas.mul(120).div(100); // +20% de marge
+                        gasLimit = estimatedGas.mul(120).div(100);
                         debugLog(`⛽ Gas estimé: ${estimatedGas.toString()}`, 'info');
                     } catch (error) {
                         debugLog(`⚠️ Impossible d'estimer le gas, utilisation de 300000`, 'warning');
                         gasLimit = ethers.BigNumber.from('300000');
                     }
                     
-                    const tx = await router.swapExactETHForTokens(
+                    const tx = await router.swapExactTokensForTokens(
+                        amountInWei,
                         amountOutMin,
                         path,
                         state.account,
                         deadline,
-                        { 
-                            value: amountInWei,
-                            gasLimit: gasLimit
-                        }
+                        { gasLimit: gasLimit }
                     );
                     
                     debugLog(`⏳ Transaction envoyée: ${tx.hash.slice(0, 10)}...`, 'info');
@@ -1116,10 +1121,10 @@
                     debugLog(`⛽ Frais gas: ${actualFees.toFixed(6)} BNB`, 'info');
                     
                 } else {
-                    debugLog('💸 Vente via PancakeSwap...', 'info');
+                    debugLog('💸 Vente via PancakeSwap (Token → USDT)...', 'info');
                     
                     const routerABI = [
-                        'function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline) external returns (uint[] memory amounts)'
+                        'function swapExactTokensForTokens(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline) external returns (uint[] memory amounts)'
                     ];
                     
                     const tokenABI = [
@@ -1127,7 +1132,6 @@
                         'function balanceOf(address account) view returns (uint256)'
                     ];
                     
-                    // Récupérer le balance du token
                     const tokenContract = new ethers.Contract(tokenAddress, tokenABI, state.wallet);
                     const tokenBalance = await tokenContract.balanceOf(state.account);
                     
@@ -1140,39 +1144,36 @@
                         return;
                     }
                     
-                    // Approuver le router
                     debugLog('📝 Approbation du router...', 'info');
                     const approveTx = await tokenContract.approve(PANCAKE_ROUTER, tokenBalance);
                     debugLog(`⏳ Approbation: ${approveTx.hash.slice(0, 10)}...`, 'info');
                     await approveTx.wait();
                     debugLog(`✅ Approbation confirmée`, 'success');
                     
-                    // Swap
                     const router = new ethers.Contract(PANCAKE_ROUTER, routerABI, state.wallet);
-                    const path = [tokenAddress, WBNB];
+                    const path = [tokenAddress, USDT];
                     const deadline = Math.floor(Date.now() / 1000) + 60 * 20;
                     const amountOutMin = 0;
                     
-                    debugLog('📝 Préparation de la vente...', 'info');
+                    debugLog('📝 Préparation de la vente (Token → USDT)...', 'info');
                     
-                    // Estimer le gas
                     let gasLimit;
                     try {
-                        const estimatedGas = await router.estimateGas.swapExactTokensForETH(
+                        const estimatedGas = await router.estimateGas.swapExactTokensForTokens(
                             tokenBalance,
                             amountOutMin,
                             path,
                             state.account,
                             deadline
                         );
-                        gasLimit = estimatedGas.mul(120).div(100); // +20% de marge
+                        gasLimit = estimatedGas.mul(120).div(100);
                         debugLog(`⛽ Gas estimé: ${estimatedGas.toString()}`, 'info');
                     } catch (error) {
                         debugLog(`⚠️ Impossible d'estimer le gas, utilisation de 300000`, 'warning');
                         gasLimit = ethers.BigNumber.from('300000');
                     }
                     
-                    const tx = await router.swapExactTokensForETH(
+                    const tx = await router.swapExactTokensForTokens(
                         tokenBalance,
                         amountOutMin,
                         path,
@@ -1194,9 +1195,8 @@
             } catch (error) {
                 debugLog(`❌ ERREUR BLOCKCHAIN: ${error.message}`, 'error');
                 
-                // Messages d'erreur détaillés
                 if (error.message.includes('insufficient funds')) {
-                    alert('❌ Fonds insuffisants!\n\nVérifiez votre balance BNB.\n\n💡 Réduisez votre capital ou le % par trade!');
+                    alert('❌ Fonds insuffisants!\n\nVérifiez votre balance USDT.\n\n💡 Réduisez votre capital ou le % par trade!');
                 } else if (error.message.includes('user rejected')) {
                     alert('❌ Transaction rejetée par l\'utilisateur');
                 } else if (error.message.includes('INSUFFICIENT_OUTPUT_AMOUNT')) {
@@ -1209,7 +1209,6 @@
                 return;
             }
             
-            // Mise à jour du capital
             if (tradeType === 'BUY') {
                 if (tradeAmount > state.tradingCapital) {
                     debugLog(`❌ Capital insuffisant`, 'error');
@@ -1220,21 +1219,21 @@
                 state.tradingCapital -= tradeAmount;
                 state.currentPosition = 'BUY';
                 state.lastBuyPrice = state.currentPrice;
-                state.positionAmount = tradeAmount - actualFees;
+                state.positionAmount = tradeAmount;
                 state.entryFees = actualFees;
                 
                 debugLog(`📈 POSITION OUVERTE`, 'success');
-                debugLog(`💵 Net: ${state.positionAmount.toFixed(4)} BNB`, 'info');
+                debugLog(`💵 Montant: ${state.positionAmount.toFixed(2)} USDT`, 'info');
                 
             } else {
                 const profitPct = ((state.currentPrice - state.lastBuyPrice) / state.lastBuyPrice) * 100;
                 const grossProfit = state.positionAmount * (profitPct / 100);
-                netProfit = grossProfit - actualFees;
+                netProfit = grossProfit;
                 
-                state.tradingCapital += state.positionAmount + grossProfit - actualFees;
+                state.tradingCapital += state.positionAmount + grossProfit;
                 
                 debugLog(`📉 POSITION FERMÉE`, netProfit >= 0 ? 'success' : 'error');
-                debugLog(`💎 NET: ${netProfit >= 0 ? '+' : ''}${netProfit.toFixed(4)} BNB`, netProfit >= 0 ? 'success' : 'error');
+                debugLog(`💎 NET: ${netProfit >= 0 ? '+' : ''}${netProfit.toFixed(2)} USDT`, netProfit >= 0 ? 'success' : 'error');
                 
                 state.currentPosition = null;
                 state.entryFees = 0;
@@ -1248,11 +1247,11 @@
                 id: Date.now(),
                 time: new Date().toLocaleTimeString('fr-FR'),
                 type: tradeType,
-                amount: tradeAmount.toFixed(4),
+                amount: tradeAmount.toFixed(2),
                 price: state.currentPrice.toFixed(2),
-                profit: netProfit.toFixed(4),
+                profit: netProfit.toFixed(2),
                 profitPct: tradeType === 'SELL' ? ((netProfit / state.positionAmount) * 100).toFixed(2) : '0',
-                fees: actualFees.toFixed(4),
+                fees: actualFees.toFixed(6),
                 reason: reason,
                 score: score,
                 mode: 'real'
@@ -1286,7 +1285,7 @@
                             <p class="text-lg font-bold ${parseFloat(t.profitPct) >= 0 ? 'text-green-400' : 'text-red-400'}">
                                 ${parseFloat(t.profitPct) >= 0 ? '+' : ''}${t.profitPct}%
                             </p>
-                            <p class="text-xs ${parseFloat(t.profit) >= 0 ? 'text-green-400' : 'text-red-400'}">${parseFloat(t.profit) >= 0 ? '+' : ''}${t.profit} BNB</p>
+                            <p class="text-xs ${parseFloat(t.profit) >= 0 ? 'text-green-400' : 'text-red-400'}">${parseFloat(t.profit) >= 0 ? '+' : ''}${t.profit} USDT</p>
                         ` : '<p class="text-sm text-gray-400">Ouvert</p>'}
                     </div>
                 </div>
@@ -1299,10 +1298,12 @@
             }
             
             try {
-                const balance = await state.provider.getBalance(state.account);
-                const bnbBalance = parseFloat(ethers.utils.formatEther(balance));
+                const usdtContract = new ethers.Contract(USDT, USDT_ABI, state.provider);
+                const usdtBalance = await usdtContract.balanceOf(state.account);
+                const usdtBalanceFormatted = parseFloat(ethers.utils.formatUnits(usdtBalance, 18));
                 
-                debugLog(`💰 Balance: ${bnbBalance.toFixed(4)} BNB`, 'info');
+                debugLog(`💰 Balance USDT: ${usdtBalanceFormatted.toFixed(2)} USDT`, 'info');
+                state.usdtBalance = usdtBalanceFormatted;
                 
             } catch (error) {
                 debugLog(`❌ Erreur balance: ${error.message}`, 'error');
@@ -1345,11 +1346,10 @@
                 }
             }
             
-            document.getElementById('modeStatus').innerHTML = '<span style="color: #f59e0b;">🤖 JERCAT AUTO</span>';
-            document.getElementById('profitDisplay').textContent = state.portfolio.profit.toFixed(4);
+            document.getElementById('modeStatus').innerHTML = '<span style="color: #f59e0b;">🤖 JERCAT AUTO (USDT)</span>';
+            document.getElementById('profitDisplay').textContent = state.portfolio.profit.toFixed(2);
             document.getElementById('tradesCount').textContent = state.trades.length;
             
-            // ✅ Mise à jour du statut de position
             if (state.currentPosition) {
                 const profitPct = ((state.currentPrice - state.lastBuyPrice) / state.lastBuyPrice) * 100;
                 document.getElementById('positionStatus').innerHTML = `<span class="${profitPct >= 0 ? 'text-green-400' : 'text-red-400'}">🟢 ${profitPct >= 0 ? '+' : ''}${profitPct.toFixed(2)}%</span>`;
@@ -1357,7 +1357,6 @@
                 document.getElementById('positionStatus').textContent = '⚪ None';
             }
             
-            // ✅ Mise à jour du Win Rate
             const totalTrades = state.portfolio.wins + state.portfolio.losses;
             const winRate = totalTrades > 0 ? ((state.portfolio.wins / totalTrades) * 100).toFixed(0) : 0;
             document.getElementById('winRateDisplay').textContent = winRate + '%';
