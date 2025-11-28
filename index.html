@@ -1014,7 +1014,7 @@
             let netProfit = 0;
             let actualFees = 0;
             
-            // 🔥 MODE RÉEL UNIQUEMENT - PAS DE SIMULATION
+            // 🔥 MODE RÉEL UNIQUEMENT - Vérification wallet
             if (!state.isConnected || !state.wallet) {
                 debugLog(`❌ ERREUR: Wallet non connecté!`, 'error');
                 alert('⚠️ Connectez votre wallet pour trader en MODE RÉEL');
@@ -1023,16 +1023,27 @@
             }
             
             try {
+                // 🔥 VÉRIFIER LE NETWORK BSC
+                const network = await state.provider.getNetwork();
+                if (network.chainId !== 56) {
+                    debugLog(`❌ ERREUR: Mauvais network! ChainID: ${network.chainId}`, 'error');
+                    alert(`⚠️ Changez vers BSC Mainnet!\n\nNetwork actuel: ${network.name} (${network.chainId})\nRequis: BSC Mainnet (56)`);
+                    state.isTrading = false;
+                    return;
+                }
+                
                 debugLog('🔗 Exécution BLOCKCHAIN sur BSC...', 'warning');
+                debugLog(`💰 Montant du trade: ${tradeAmount.toFixed(4)} BNB`, 'info');
                 
                 const tokenAddress = getTokenAddress(state.selectedCrypto);
                 const amountInWei = ethers.utils.parseEther(tradeAmount.toFixed(6));
                 
+                const PANCAKE_ROUTER = '0x10ED43C718714eb63d5aA57B78B54704E256024E';
+                const WBNB = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c';
+                
                 if (tradeType === 'BUY') {
                     debugLog('💰 Achat via PancakeSwap...', 'info');
-                    
-                    const PANCAKE_ROUTER = '0x10ED43C718714eb63d5aA57B78B54704E256024E';
-                    const WBNB = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c';
+                    debugLog(`🎯 Token: ${tokenAddress}`, 'info');
                     
                     const routerABI = [
                         'function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) external payable returns (uint[] memory amounts)'
@@ -1042,28 +1053,49 @@
                     
                     const path = [WBNB, tokenAddress];
                     const deadline = Math.floor(Date.now() / 1000) + 60 * 20;
-                    const amountOutMin = 0;
+                    const amountOutMin = 0; // Accepter tout slippage (à ajuster si nécessaire)
+                    
+                    debugLog('📝 Préparation de la transaction...', 'info');
+                    
+                    // Estimer le gas
+                    let gasLimit;
+                    try {
+                        const estimatedGas = await router.estimateGas.swapExactETHForTokens(
+                            amountOutMin,
+                            path,
+                            state.account,
+                            deadline,
+                            { value: amountInWei }
+                        );
+                        gasLimit = estimatedGas.mul(120).div(100); // +20% de marge
+                        debugLog(`⛽ Gas estimé: ${estimatedGas.toString()}`, 'info');
+                    } catch (error) {
+                        debugLog(`⚠️ Impossible d'estimer le gas, utilisation de 300000`, 'warning');
+                        gasLimit = ethers.BigNumber.from('300000');
+                    }
                     
                     const tx = await router.swapExactETHForTokens(
                         amountOutMin,
                         path,
                         state.account,
                         deadline,
-                        { value: amountInWei }
+                        { 
+                            value: amountInWei,
+                            gasLimit: gasLimit
+                        }
                     );
                     
                     debugLog(`⏳ Transaction envoyée: ${tx.hash.slice(0, 10)}...`, 'info');
+                    debugLog(`🔗 BscScan: https://bscscan.com/tx/${tx.hash}`, 'success');
+                    
                     const receipt = await tx.wait();
                     debugLog(`✅ Transaction confirmée! Bloc: ${receipt.blockNumber}`, 'success');
-                    debugLog(`🔗 TxHash: ${tx.hash}`, 'info');
                     
-                    actualFees = parseFloat(ethers.utils.formatEther(receipt.gasUsed.mul(tx.gasPrice)));
+                    actualFees = parseFloat(ethers.utils.formatEther(receipt.gasUsed.mul(receipt.effectiveGasPrice)));
+                    debugLog(`⛽ Frais gas: ${actualFees.toFixed(6)} BNB`, 'info');
                     
                 } else {
                     debugLog('💸 Vente via PancakeSwap...', 'info');
-                    
-                    const PANCAKE_ROUTER = '0x10ED43C718714eb63d5aA57B78B54704E256024E';
-                    const WBNB = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c';
                     
                     const routerABI = [
                         'function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline) external returns (uint[] memory amounts)'
@@ -1078,16 +1110,21 @@
                     const tokenContract = new ethers.Contract(tokenAddress, tokenABI, state.wallet);
                     const tokenBalance = await tokenContract.balanceOf(state.account);
                     
+                    debugLog(`📊 Balance token: ${ethers.utils.formatEther(tokenBalance)}`, 'info');
+                    
                     if (tokenBalance.isZero()) {
                         debugLog(`❌ Aucun token à vendre!`, 'error');
+                        alert('❌ Aucun token dans votre wallet!');
                         state.isTrading = false;
                         return;
                     }
                     
                     // Approuver le router
+                    debugLog('📝 Approbation du router...', 'info');
                     const approveTx = await tokenContract.approve(PANCAKE_ROUTER, tokenBalance);
                     debugLog(`⏳ Approbation: ${approveTx.hash.slice(0, 10)}...`, 'info');
                     await approveTx.wait();
+                    debugLog(`✅ Approbation confirmée`, 'success');
                     
                     // Swap
                     const router = new ethers.Contract(PANCAKE_ROUTER, routerABI, state.wallet);
@@ -1095,24 +1132,58 @@
                     const deadline = Math.floor(Date.now() / 1000) + 60 * 20;
                     const amountOutMin = 0;
                     
+                    debugLog('📝 Préparation de la vente...', 'info');
+                    
+                    // Estimer le gas
+                    let gasLimit;
+                    try {
+                        const estimatedGas = await router.estimateGas.swapExactTokensForETH(
+                            tokenBalance,
+                            amountOutMin,
+                            path,
+                            state.account,
+                            deadline
+                        );
+                        gasLimit = estimatedGas.mul(120).div(100); // +20% de marge
+                        debugLog(`⛽ Gas estimé: ${estimatedGas.toString()}`, 'info');
+                    } catch (error) {
+                        debugLog(`⚠️ Impossible d'estimer le gas, utilisation de 300000`, 'warning');
+                        gasLimit = ethers.BigNumber.from('300000');
+                    }
+                    
                     const tx = await router.swapExactTokensForETH(
                         tokenBalance,
                         amountOutMin,
                         path,
                         state.account,
-                        deadline
+                        deadline,
+                        { gasLimit: gasLimit }
                     );
                     
                     debugLog(`⏳ Transaction envoyée: ${tx.hash.slice(0, 10)}...`, 'info');
+                    debugLog(`🔗 BscScan: https://bscscan.com/tx/${tx.hash}`, 'success');
+                    
                     const receipt = await tx.wait();
                     debugLog(`✅ Transaction confirmée! Bloc: ${receipt.blockNumber}`, 'success');
-                    debugLog(`🔗 TxHash: ${tx.hash}`, 'info');
                     
-                    actualFees = parseFloat(ethers.utils.formatEther(receipt.gasUsed.mul(tx.gasPrice)));
+                    actualFees = parseFloat(ethers.utils.formatEther(receipt.gasUsed.mul(receipt.effectiveGasPrice)));
+                    debugLog(`⛽ Frais gas: ${actualFees.toFixed(6)} BNB`, 'info');
                 }
                 
             } catch (error) {
                 debugLog(`❌ ERREUR BLOCKCHAIN: ${error.message}`, 'error');
+                
+                // Messages d'erreur détaillés
+                if (error.message.includes('insufficient funds')) {
+                    alert('❌ Fonds insuffisants!\n\nVérifiez votre balance BNB.');
+                } else if (error.message.includes('user rejected')) {
+                    alert('❌ Transaction rejetée par l\'utilisateur');
+                } else if (error.message.includes('INSUFFICIENT_OUTPUT_AMOUNT')) {
+                    alert('❌ Slippage trop élevé!\n\nLe prix a trop bougé. Réessayez.');
+                } else {
+                    alert(`❌ Erreur: ${error.message.slice(0, 100)}`);
+                }
+                
                 state.isTrading = false;
                 return;
             }
