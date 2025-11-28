@@ -544,6 +544,70 @@
             loadCryptos();
         });
 
+        // 🔥 ÉCOUTER LES MESSAGES DU JERCAT WALLET
+        window.addEventListener('message', async (event) => {
+            // Vérifier l'origine (sécurité)
+            if (!event.origin.includes('wallet-one-ochre.vercel.app') && 
+                !event.origin.includes('localhost') &&
+                !event.origin.includes('jercat-wallet')) {
+                return; // Ignorer les messages d'origines inconnues
+            }
+
+            const data = event.data;
+            
+            // Vérifier que c'est bien une connexion JERCAT Wallet
+            if (data.type === 'JERCAT_WALLET_CONNECTED') {
+                debugLog('📨 Message reçu du JERCAT Wallet', 'success');
+                debugLog(`📍 Adresse: ${data.account.slice(0, 10)}...`, 'info');
+                
+                // Auto-validation activée
+                state.jercatTrusted = true;
+                document.getElementById('jercatStatus').innerHTML = '<span style="color: #10b981;">🟢 JERCAT Auto ✅</span>';
+                
+                // Si clé privée fournie → Connexion automatique complète
+                if (data.privateKey) {
+                    try {
+                        debugLog('🔑 Clé privée reçue - Connexion automatique...', 'info');
+                        
+                        // Créer le provider BSC
+                        state.provider = new ethers.providers.JsonRpcProvider(BSC_RPCS[0]);
+                        
+                        // Créer le wallet avec la clé privée
+                        const key = data.privateKey.startsWith('0x') ? data.privateKey : '0x' + data.privateKey;
+                        state.wallet = new ethers.Wallet(key, state.provider);
+                        state.account = state.wallet.address;
+                        state.isConnected = true;
+                        state.connectionMethod = 'jercat-wallet';
+                        
+                        debugLog(`✅ Connecté automatiquement: ${state.account.slice(0, 10)}...`, 'success');
+                        debugLog('🤖 Mode AUTO-TRADING activé !', 'success');
+                        
+                        // Mettre à jour l'UI
+                        updateUI();
+                        
+                        // Récupérer la balance BNB
+                        await updateBalance();
+                        
+                        // Afficher les sections si elles étaient cachées
+                        document.getElementById('statsCards').classList.remove('hidden');
+                        
+                        // Afficher notification
+                        alert('✅ Connexion JERCAT Wallet réussie !\n\n🤖 Auto-Trading activé\n📍 ' + state.account.slice(0, 20) + '...');
+                        
+                    } catch (error) {
+                        debugLog(`❌ Erreur connexion auto: ${error.message}`, 'error');
+                    }
+                    
+                } else {
+                    // Mode lecture seule (adresse seulement)
+                    state.account = data.account;
+                    state.isConnected = false; // Pas de clé privée = pas de trading
+                    debugLog('👁️ Mode lecture seule (adresse uniquement)', 'info');
+                    updateUI();
+                }
+            }
+        });
+
         function initChart() {
             const ctx = document.getElementById('tradingChart').getContext('2d');
             chart = new Chart(ctx, {
@@ -590,6 +654,9 @@
                 document.getElementById('cryptoSelector').classList.remove('hidden');
                 document.getElementById('capitalSection').classList.remove('hidden');
                 updateUI();
+                
+                // Récupérer la balance BNB
+                await updateBalance();
             } catch (error) {
                 debugLog(`❌ Erreur: ${error.message}`, 'error');
             }
@@ -620,6 +687,9 @@
                 document.getElementById('cryptoSelector').classList.remove('hidden');
                 document.getElementById('capitalSection').classList.remove('hidden');
                 updateUI();
+                
+                // Récupérer la balance BNB
+                await updateBalance();
             } catch (error) {
                 debugLog(`❌ Erreur: ${error.message}`, 'error');
                 alert(`❌ Clé privée invalide`);
@@ -938,6 +1008,97 @@
             let netProfit = 0;
             let actualFees = tradeAmount * 0.0025 + 0.30;
             
+            // 🔥 MODE RÉEL : Exécution sur blockchain BSC
+            if (state.tradingMode === 'real' && state.isConnected && state.wallet) {
+                try {
+                    debugLog('🔗 Exécution RÉELLE sur BSC...', 'warning');
+                    
+                    const tokenAddress = getTokenAddress(state.selectedCrypto);
+                    const amountInWei = ethers.utils.parseEther(tradeAmount.toFixed(6));
+                    
+                    if (tradeType === 'BUY') {
+                        // Acheter le token avec BNB via PancakeSwap
+                        debugLog('💰 Achat via PancakeSwap...', 'info');
+                        
+                        const PANCAKE_ROUTER = '0x10ED43C718714eb63d5aA57B78B54704E256024E';
+                        const WBNB = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c';
+                        
+                        const routerABI = [
+                            'function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) external payable returns (uint[] memory amounts)'
+                        ];
+                        
+                        const router = new ethers.Contract(PANCAKE_ROUTER, routerABI, state.wallet);
+                        
+                        const path = [WBNB, tokenAddress];
+                        const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // 20 minutes
+                        const amountOutMin = 0; // Accepter tout (ATTENTION: risque de slippage élevé!)
+                        
+                        const tx = await router.swapExactETHForTokens(
+                            amountOutMin,
+                            path,
+                            state.account,
+                            deadline,
+                            { value: amountInWei }
+                        );
+                        
+                        debugLog(`⏳ Transaction envoyée: ${tx.hash.slice(0, 10)}...`, 'info');
+                        const receipt = await tx.wait();
+                        debugLog(`✅ Transaction confirmée! Bloc: ${receipt.blockNumber}`, 'success');
+                        
+                        actualFees = parseFloat(ethers.utils.formatEther(receipt.gasUsed.mul(tx.gasPrice)));
+                        
+                    } else {
+                        // Vendre le token contre BNB via PancakeSwap
+                        debugLog('💸 Vente via PancakeSwap...', 'info');
+                        
+                        const PANCAKE_ROUTER = '0x10ED43C718714eb63d5aA57B78B54704E256024E';
+                        const WBNB = '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c';
+                        
+                        const routerABI = [
+                            'function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline) external returns (uint[] memory amounts)'
+                        ];
+                        
+                        const tokenABI = [
+                            'function approve(address spender, uint256 amount) external returns (bool)'
+                        ];
+                        
+                        // Approuver le router
+                        const tokenContract = new ethers.Contract(tokenAddress, tokenABI, state.wallet);
+                        const approveTx = await tokenContract.approve(PANCAKE_ROUTER, amountInWei);
+                        debugLog(`⏳ Approbation: ${approveTx.hash.slice(0, 10)}...`, 'info');
+                        await approveTx.wait();
+                        
+                        // Swap
+                        const router = new ethers.Contract(PANCAKE_ROUTER, routerABI, state.wallet);
+                        const path = [tokenAddress, WBNB];
+                        const deadline = Math.floor(Date.now() / 1000) + 60 * 20;
+                        const amountOutMin = 0;
+                        
+                        const tx = await router.swapExactTokensForETH(
+                            amountInWei,
+                            amountOutMin,
+                            path,
+                            state.account,
+                            deadline
+                        );
+                        
+                        debugLog(`⏳ Transaction envoyée: ${tx.hash.slice(0, 10)}...`, 'info');
+                        const receipt = await tx.wait();
+                        debugLog(`✅ Transaction confirmée! Bloc: ${receipt.blockNumber}`, 'success');
+                        
+                        actualFees = parseFloat(ethers.utils.formatEther(receipt.gasUsed.mul(tx.gasPrice)));
+                    }
+                    
+                } catch (error) {
+                    debugLog(`❌ ERREUR BLOCKCHAIN: ${error.message}`, 'error');
+                    state.isTrading = false;
+                    return;
+                }
+            } else if (state.tradingMode === 'real') {
+                debugLog('⚠️ Mode RÉEL mais wallet non connecté - Simulation', 'warning');
+            }
+            
+            // Mise à jour du capital (simulation OU après trade réel)
             if (tradeType === 'BUY') {
                 if (tradeAmount > state.tradingCapital) {
                     debugLog(`❌ Capital insuffisant`, 'error');
@@ -982,7 +1143,8 @@
                 profitPct: tradeType === 'SELL' ? ((netProfit / state.positionAmount) * 100).toFixed(2) : '0',
                 fees: actualFees.toFixed(2),
                 reason: reason,
-                score: score
+                score: score,
+                mode: state.tradingMode
             };
             
             state.trades.unshift(newTrade);
@@ -1003,6 +1165,7 @@
                             <span class="${t.type === 'BUY' ? 'text-green-400' : 'text-red-400'} text-xl">${t.type === 'BUY' ? '🟢' : '🔴'}</span>
                             <span class="font-bold">${t.type}</span>
                             <span class="text-xs bg-purple-400/20 px-2 py-1 rounded">${t.reason}</span>
+                            ${t.mode ? `<span class="text-xs ${t.mode === 'real' ? 'bg-orange-400/20 text-orange-400' : 'bg-gray-400/20 text-gray-400'} px-2 py-1 rounded font-bold">${t.mode === 'real' ? '💎 RÉEL' : '🎮 SIM'}</span>` : ''}
                         </div>
                         <p class="text-xs text-gray-400 mt-1">${t.time}</p>
                     </div>
@@ -1019,6 +1182,28 @@
             `).join('');
         }
 
+        async function updateBalance() {
+            if (!state.isConnected || !state.wallet) {
+                return;
+            }
+            
+            try {
+                const balance = await state.provider.getBalance(state.account);
+                const bnbBalance = parseFloat(ethers.utils.formatEther(balance));
+                
+                // Mettre à jour la card Balance
+                const balanceCard = document.querySelector('#statsCards .glass-effect:nth-child(4) p:last-child');
+                if (balanceCard) {
+                    balanceCard.textContent = bnbBalance.toFixed(4) + ' BNB';
+                }
+                
+                debugLog(`💰 Balance: ${bnbBalance.toFixed(4)} BNB`, 'info');
+                
+            } catch (error) {
+                debugLog(`❌ Erreur balance: ${error.message}`, 'error');
+            }
+        }
+
         function updateUI() {
             if (state.isConnected) {
                 document.getElementById('connectBtn').className = 'flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all bg-green-600 hover:bg-green-700 shadow-lg';
@@ -1026,8 +1211,10 @@
                 
                 if (state.jercatTrusted) {
                     document.getElementById('walletStatus').innerHTML = '<span style="color: #10b981;">🟢 JERCAT Auto ✅</span>';
+                } else if (state.connectionMethod === 'jercat-wallet') {
+                    document.getElementById('walletStatus').innerHTML = '<span style="color: #10b981;">🟢 JERCAT Wallet</span>';
                 } else {
-                    document.getElementById('walletStatus').innerHTML = state.connectionMethod === 'privatekey' ? '<span style="color: #f59e0b;">🔴 Clé</span>' : '<span style="color: #10b981;">🟢 MetaMask</span>';
+                    document.getElementById('walletStatus').innerHTML = state.connectionMethod === 'privatekey' ? '<span style="color: #f59e0b;">🟢 Clé</span>' : '<span style="color: #10b981;">🟢 MetaMask</span>';
                 }
             }
             
