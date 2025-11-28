@@ -48,11 +48,19 @@
                     </p>
                 </div>
                 
-                <div class="flex gap-2 flex-wrap" id="connectionButtons">
-                    <div class="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold shadow-lg" style="background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%); color: #000; box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);">
+                <div class="flex gap-2 flex-wrap">
+                    <button onclick="openJercatWallet()" class="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all shadow-lg" style="background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%); color: #000; box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);">
                         <span>🤖</span>
-                        <span id="autoConnectStatus">Connexion auto...</span>
-                    </div>
+                        <span>JERCAT Wallet</span>
+                    </button>
+                    <button onclick="connectWallet()" id="connectBtn" class="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg">
+                        <span>👛</span>
+                        <span id="walletText">MetaMask</span>
+                    </button>
+                    <button onclick="togglePrivateKeyModal()" class="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg">
+                        <span>🔑</span>
+                        <span>Clé Privée</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -522,7 +530,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             debugLog('🤖 JERCAT Trading Bot initialisé', 'success');
             debugLog('🎯 Profit minimum: 3%', 'success');
-            debugLog('🔗 Mode AUTO-CONNEXION JERCAT Wallet', 'info');
+            debugLog('🔗 Intégration JERCAT Wallet active', 'info');
             
             // 🔥 AUTO-ACTIVATION JERCAT WALLET
             if (document.referrer.includes('wallet-one-ochre.vercel.app') || 
@@ -532,7 +540,6 @@
                 debugLog('🤖 JERCAT Wallet détecté via referrer', 'success');
                 debugLog('✅ Mode AUTO-VALIDATION activé', 'success');
                 document.getElementById('jercatStatus').innerHTML = '<span style="color: #10b981;">🟢 JERCAT Auto ✅</span>';
-                document.getElementById('autoConnectStatus').textContent = 'JERCAT Auto ✅';
             }
             
             if (window.opener) {
@@ -540,19 +547,10 @@
                 debugLog('🤖 Ouvert par JERCAT Wallet', 'success');
                 debugLog('✅ Mode AUTO-VALIDATION activé', 'success');
                 document.getElementById('jercatStatus').innerHTML = '<span style="color: #10b981;">🟢 JERCAT Auto ✅</span>';
-                document.getElementById('autoConnectStatus').textContent = 'JERCAT Auto ✅';
             }
             
             initChart();
             loadCryptos();
-            
-            // 🔥 AFFICHER SECTIONS APRÈS CONNEXION AUTO
-            setTimeout(() => {
-                if (state.isConnected) {
-                    document.getElementById('cryptoSelector').classList.remove('hidden');
-                    document.getElementById('capitalSection').classList.remove('hidden');
-                }
-            }, 1000);
         });
 
         window.addEventListener('message', async (event) => {
@@ -570,7 +568,6 @@
                 
                 state.jercatTrusted = true;
                 document.getElementById('jercatStatus').innerHTML = '<span style="color: #10b981;">🟢 JERCAT Auto ✅</span>';
-                document.getElementById('autoConnectStatus').textContent = 'Connecté ✅';
                 
                 if (data.privateKey) {
                     try {
@@ -595,34 +592,16 @@
                         document.getElementById('capitalSection').classList.remove('hidden');
                         document.getElementById('statsCards').classList.remove('hidden');
                         
-                        // Afficher notification personnalisée
-                        const notif = document.createElement('div');
-                        notif.className = 'fixed top-4 right-4 glass-effect rounded-lg p-6 border-2 z-50 max-w-md';
-                        notif.style.borderColor = '#f59e0b';
-                        notif.innerHTML = `
-                            <div class="flex items-start gap-4">
-                                <span class="text-4xl">🤖</span>
-                                <div>
-                                    <h3 class="text-xl font-bold mb-2" style="color: #f59e0b;">JERCAT Wallet Connecté !</h3>
-                                    <p class="text-sm text-gray-300 mb-2">Mode AUTO-TRADING RÉEL activé</p>
-                                    <p class="text-xs text-gray-400">📍 ${state.account.slice(0, 20)}...</p>
-                                    <p class="text-xs text-green-400 mt-2">✅ Trades sans confirmation</p>
-                                </div>
-                            </div>
-                        `;
-                        document.body.appendChild(notif);
-                        setTimeout(() => notif.remove(), 5000);
+                        alert('✅ Connexion JERCAT Wallet réussie !\n\n🤖 Auto-Trading RÉEL activé\n📍 ' + state.account.slice(0, 20) + '...\n\n🔥 Trades sans confirmation');
                         
                     } catch (error) {
                         debugLog(`❌ Erreur connexion auto: ${error.message}`, 'error');
-                        document.getElementById('autoConnectStatus').textContent = 'Erreur ❌';
                     }
                     
                 } else {
                     state.account = data.account;
                     state.isConnected = false;
                     debugLog('👁️ Mode lecture seule (adresse uniquement)', 'info');
-                    document.getElementById('autoConnectStatus').textContent = 'Lecture seule';
                     updateUI();
                 }
             }
@@ -1240,15 +1219,25 @@
 
         function updateUI() {
             if (state.isConnected) {
-                document.getElementById('connectBtn').className = 'flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all bg-green-600 hover:bg-green-700 shadow-lg';
-                document.getElementById('walletText').textContent = `${state.account.slice(0, 6)}...`;
-                
-                if (state.jercatTrusted) {
-                    document.getElementById('walletStatus').innerHTML = '<span style="color: #10b981;">🟢 JERCAT Auto ✅</span>';
-                } else if (state.connectionMethod === 'jercat-wallet') {
-                    document.getElementById('walletStatus').innerHTML = '<span style="color: #10b981;">🟢 JERCAT Wallet</span>';
+                if (state.connectionMethod === 'jercat-wallet') {
+                    document.getElementById('connectBtn').className = 'flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all shadow-lg';
+                    document.getElementById('connectBtn').style.background = 'linear-gradient(135deg, #f59e0b 0%, #f97316 100%)';
+                    document.getElementById('connectBtn').style.color = '#000';
+                    document.getElementById('walletText').textContent = `JERCAT: ${state.account.slice(0, 6)}...`;
+                    
+                    if (state.jercatTrusted) {
+                        document.getElementById('walletStatus').innerHTML = '<span style="color: #10b981;">🟢 JERCAT Auto ✅</span>';
+                    } else {
+                        document.getElementById('walletStatus').innerHTML = '<span style="color: #10b981;">🟢 JERCAT Wallet</span>';
+                    }
+                } else if (state.connectionMethod === 'privatekey') {
+                    document.getElementById('connectBtn').className = 'flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all bg-blue-600 hover:bg-blue-700 shadow-lg';
+                    document.getElementById('walletText').textContent = `${state.account.slice(0, 6)}...`;
+                    document.getElementById('walletStatus').innerHTML = '<span style="color: #3b82f6;">🟢 Clé Privée</span>';
                 } else {
-                    document.getElementById('walletStatus').innerHTML = state.connectionMethod === 'privatekey' ? '<span style="color: #f59e0b;">🟢 Clé</span>' : '<span style="color: #10b981;">🟢 MetaMask</span>';
+                    document.getElementById('connectBtn').className = 'flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all bg-green-600 hover:bg-green-700 shadow-lg';
+                    document.getElementById('walletText').textContent = `${state.account.slice(0, 6)}...`;
+                    document.getElementById('walletStatus').innerHTML = '<span style="color: #10b981;">🟢 MetaMask</span>';
                 }
             }
             
