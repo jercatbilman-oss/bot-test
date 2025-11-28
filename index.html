@@ -340,6 +340,7 @@
             'https://bsc-dataseed1.defibit.io'
         ];
         
+        // 🔥 FIX: Variables manquantes ajoutées
         let state = {
             account: null,
             wallet: null,
@@ -347,7 +348,7 @@
             isConnected: false,
             connectionMethod: null,
             selectedCrypto: 'BTCUSDT',
-            customToken: null, // Token personnalisé {address, name, symbol, decimals}
+            customToken: null,
             currentPrice: 0,
             priceHistory: [],
             volumeHistory: [],
@@ -356,16 +357,18 @@
             capitalSet: false,
             tradingMode: 'real',
             botRunning: false,
+            isTrading: false,  // ✅ FIX: Ajouté
             trades: [],
             portfolio: { profit: 0, wins: 0, losses: 0 },
             indicators: {},
             signals: {},
             currentPosition: null,
             lastBuyPrice: 0,
+            lastMacdHist: 0,  // ✅ FIX: Ajouté
             positionAmount: 0,
             entryFees: 0,
             minProfitPct: 3.0,
-            jercatTrusted: false  // 🔥 AUTO-VALIDATION
+            jercatTrusted: false
         };
 
         const TOKEN_ADDRESSES = {
@@ -378,11 +381,9 @@
         const USDT = '0x55d398326f99059fF775485246999027B3197955';
         
         function getTokenAddress(symbol) {
-            // Si token custom
             if (symbol && symbol.startsWith('CUSTOM_') && state.customToken) {
                 return state.customToken.address;
             }
-            // Sinon token pré-configuré
             return TOKEN_ADDRESSES[symbol] || WBNB;
         }
 
@@ -477,7 +478,6 @@
         let botInterval = null;
         let chart = null;
 
-        // 🤖 FONCTION GLOBALE POUR ÉTABLIR LA CONFIANCE (appelée par JERCAT Wallet)
         window.establishJercatTrust = function(appName) {
             if (appName === 'jercat-bot' || appName === 'jercat-wallet' || appName === 'jercat-dex') {
                 state.jercatTrusted = true;
@@ -516,13 +516,11 @@
             document.getElementById('debugConsole').innerHTML = '<p style="color: #f59e0b;">✅ Console effacée - JERCAT Bot actif</p>';
         }
 
-        // Détecter si ouvert depuis JERCAT Wallet
         window.addEventListener('DOMContentLoaded', () => {
             debugLog('🤖 JERCAT Trading Bot initialisé', 'success');
             debugLog('🎯 Profit minimum: 3%', 'success');
             debugLog('🔗 Intégration JERCAT Wallet active', 'info');
             
-            // Vérifier referrer
             if (document.referrer.includes('wallet-one-ochre.vercel.app') || 
                 document.referrer.includes('jercat-wallet') ||
                 document.referrer.includes('localhost')) {
@@ -532,7 +530,6 @@
                 document.getElementById('jercatStatus').innerHTML = '<span style="color: #10b981;">🟢 JERCAT Auto ✅</span>';
             }
             
-            // Vérifier window.opener
             if (window.opener) {
                 state.jercatTrusted = true;
                 debugLog('🤖 Ouvert par JERCAT Wallet', 'success');
@@ -544,35 +541,28 @@
             loadCryptos();
         });
 
-        // 🔥 ÉCOUTER LES MESSAGES DU JERCAT WALLET
         window.addEventListener('message', async (event) => {
-            // Vérifier l'origine (sécurité)
             if (!event.origin.includes('wallet-one-ochre.vercel.app') && 
                 !event.origin.includes('localhost') &&
                 !event.origin.includes('jercat-wallet')) {
-                return; // Ignorer les messages d'origines inconnues
+                return;
             }
 
             const data = event.data;
             
-            // Vérifier que c'est bien une connexion JERCAT Wallet
             if (data.type === 'JERCAT_WALLET_CONNECTED') {
                 debugLog('📨 Message reçu du JERCAT Wallet', 'success');
                 debugLog(`📍 Adresse: ${data.account.slice(0, 10)}...`, 'info');
                 
-                // Auto-validation activée
                 state.jercatTrusted = true;
                 document.getElementById('jercatStatus').innerHTML = '<span style="color: #10b981;">🟢 JERCAT Auto ✅</span>';
                 
-                // Si clé privée fournie → Connexion automatique complète
                 if (data.privateKey) {
                     try {
                         debugLog('🔑 Clé privée reçue - Connexion automatique...', 'info');
                         
-                        // Créer le provider BSC
                         state.provider = new ethers.providers.JsonRpcProvider(BSC_RPCS[0]);
                         
-                        // Créer le wallet avec la clé privée
                         const key = data.privateKey.startsWith('0x') ? data.privateKey : '0x' + data.privateKey;
                         state.wallet = new ethers.Wallet(key, state.provider);
                         state.account = state.wallet.address;
@@ -582,16 +572,11 @@
                         debugLog(`✅ Connecté automatiquement: ${state.account.slice(0, 10)}...`, 'success');
                         debugLog('🤖 Mode AUTO-TRADING activé !', 'success');
                         
-                        // Mettre à jour l'UI
                         updateUI();
-                        
-                        // Récupérer la balance BNB
                         await updateBalance();
                         
-                        // Afficher les sections si elles étaient cachées
                         document.getElementById('statsCards').classList.remove('hidden');
                         
-                        // Afficher notification
                         alert('✅ Connexion JERCAT Wallet réussie !\n\n🤖 Auto-Trading activé\n📍 ' + state.account.slice(0, 20) + '...');
                         
                     } catch (error) {
@@ -599,9 +584,8 @@
                     }
                     
                 } else {
-                    // Mode lecture seule (adresse seulement)
                     state.account = data.account;
-                    state.isConnected = false; // Pas de clé privée = pas de trading
+                    state.isConnected = false;
                     debugLog('👁️ Mode lecture seule (adresse uniquement)', 'info');
                     updateUI();
                 }
@@ -655,7 +639,6 @@
                 document.getElementById('capitalSection').classList.remove('hidden');
                 updateUI();
                 
-                // Récupérer la balance BNB
                 await updateBalance();
             } catch (error) {
                 debugLog(`❌ Erreur: ${error.message}`, 'error');
@@ -688,7 +671,6 @@
                 document.getElementById('capitalSection').classList.remove('hidden');
                 updateUI();
                 
-                // Récupérer la balance BNB
                 await updateBalance();
             } catch (error) {
                 debugLog(`❌ Erreur: ${error.message}`, 'error');
@@ -818,6 +800,7 @@
             state.indicators.rsi = calculateRSI(state.priceHistory, 14);
             
             const macd = calculateMACD(state.priceHistory);
+            // ✅ FIX: Sauvegarde correcte de lastMacdHist
             state.lastMacdHist = state.indicators.macdHist || 0;
             state.indicators.macd = macd.macd;
             state.indicators.macdHist = macd.hist;
@@ -840,6 +823,7 @@
             
             state.signals.trend = ema9 > ema21 && ema21 > ema50;
             state.signals.rsi = rsi >= 25 && rsi <= 45;
+            // ✅ FIX: Utilisation correcte de state.lastMacdHist
             state.signals.macd = macdHist > 0 && state.lastMacdHist <= 0;
             
             const distBB = ((state.currentPrice - bbLower) / bbLower) * 100;
@@ -937,6 +921,7 @@
                 updateIndicators();
                 const signal = getTradeSignal();
                 
+                // ✅ FIX: Utilisation correcte de state.isTrading
                 if (signal.signal && !state.isTrading) {
                     executeTrade(signal.signal, signal.score, signal.reason);
                 }
@@ -1008,7 +993,6 @@
             let netProfit = 0;
             let actualFees = tradeAmount * 0.0025 + 0.30;
             
-            // 🔥 MODE RÉEL : Exécution sur blockchain BSC
             if (state.tradingMode === 'real' && state.isConnected && state.wallet) {
                 try {
                     debugLog('🔗 Exécution RÉELLE sur BSC...', 'warning');
@@ -1017,7 +1001,6 @@
                     const amountInWei = ethers.utils.parseEther(tradeAmount.toFixed(6));
                     
                     if (tradeType === 'BUY') {
-                        // Acheter le token avec BNB via PancakeSwap
                         debugLog('💰 Achat via PancakeSwap...', 'info');
                         
                         const PANCAKE_ROUTER = '0x10ED43C718714eb63d5aA57B78B54704E256024E';
@@ -1030,8 +1013,8 @@
                         const router = new ethers.Contract(PANCAKE_ROUTER, routerABI, state.wallet);
                         
                         const path = [WBNB, tokenAddress];
-                        const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // 20 minutes
-                        const amountOutMin = 0; // Accepter tout (ATTENTION: risque de slippage élevé!)
+                        const deadline = Math.floor(Date.now() / 1000) + 60 * 20;
+                        const amountOutMin = 0;
                         
                         const tx = await router.swapExactETHForTokens(
                             amountOutMin,
@@ -1048,7 +1031,6 @@
                         actualFees = parseFloat(ethers.utils.formatEther(receipt.gasUsed.mul(tx.gasPrice)));
                         
                     } else {
-                        // Vendre le token contre BNB via PancakeSwap
                         debugLog('💸 Vente via PancakeSwap...', 'info');
                         
                         const PANCAKE_ROUTER = '0x10ED43C718714eb63d5aA57B78B54704E256024E';
@@ -1062,13 +1044,11 @@
                             'function approve(address spender, uint256 amount) external returns (bool)'
                         ];
                         
-                        // Approuver le router
                         const tokenContract = new ethers.Contract(tokenAddress, tokenABI, state.wallet);
                         const approveTx = await tokenContract.approve(PANCAKE_ROUTER, amountInWei);
                         debugLog(`⏳ Approbation: ${approveTx.hash.slice(0, 10)}...`, 'info');
                         await approveTx.wait();
                         
-                        // Swap
                         const router = new ethers.Contract(PANCAKE_ROUTER, routerABI, state.wallet);
                         const path = [tokenAddress, WBNB];
                         const deadline = Math.floor(Date.now() / 1000) + 60 * 20;
@@ -1098,7 +1078,6 @@
                 debugLog('⚠️ Mode RÉEL mais wallet non connecté - Simulation', 'warning');
             }
             
-            // Mise à jour du capital (simulation OU après trade réel)
             if (tradeType === 'BUY') {
                 if (tradeAmount > state.tradingCapital) {
                     debugLog(`❌ Capital insuffisant`, 'error');
@@ -1118,7 +1097,8 @@
             } else {
                 const profitPct = ((state.currentPrice - state.lastBuyPrice) / state.lastBuyPrice) * 100;
                 const grossProfit = state.positionAmount * (profitPct / 100);
-                netProfit = grossProfit - actualFees - state.entryFees;
+                // ✅ FIX: Calcul correct du profit net
+                netProfit = grossProfit - actualFees;
                 
                 state.tradingCapital += state.positionAmount + grossProfit - actualFees;
                 
@@ -1191,12 +1171,6 @@
                 const balance = await state.provider.getBalance(state.account);
                 const bnbBalance = parseFloat(ethers.utils.formatEther(balance));
                 
-                // Mettre à jour la card Balance
-                const balanceCard = document.querySelector('#statsCards .glass-effect:nth-child(4) p:last-child');
-                if (balanceCard) {
-                    balanceCard.textContent = bnbBalance.toFixed(4) + ' BNB';
-                }
-                
                 debugLog(`💰 Balance: ${bnbBalance.toFixed(4)} BNB`, 'info');
                 
             } catch (error) {
@@ -1233,6 +1207,19 @@
             document.getElementById('modeStatus').innerHTML = state.tradingMode === 'real' ? '<span style="color: #f59e0b;">💎 RÉEL</span>' : '<span class="text-gray-400">🎮 SIM</span>';
             document.getElementById('profitDisplay').textContent = state.portfolio.profit.toFixed(2);
             document.getElementById('tradesCount').textContent = state.trades.length;
+            
+            // ✅ Mise à jour du statut de position
+            if (state.currentPosition) {
+                const profitPct = ((state.currentPrice - state.lastBuyPrice) / state.lastBuyPrice) * 100;
+                document.getElementById('positionStatus').innerHTML = `<span class="${profitPct >= 0 ? 'text-green-400' : 'text-red-400'}">🟢 ${profitPct >= 0 ? '+' : ''}${profitPct.toFixed(2)}%</span>`;
+            } else {
+                document.getElementById('positionStatus').textContent = '⚪ None';
+            }
+            
+            // ✅ Mise à jour du Win Rate
+            const totalTrades = state.portfolio.wins + state.portfolio.losses;
+            const winRate = totalTrades > 0 ? ((state.portfolio.wins / totalTrades) * 100).toFixed(0) : 0;
+            document.getElementById('winRateDisplay').textContent = winRate + '%';
         }
     </script>
 </body>
