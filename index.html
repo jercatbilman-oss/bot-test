@@ -46,11 +46,11 @@
                 </div>
                 
                 <div class="flex gap-2 flex-wrap">
-                    <button onclick="connectJercatWallet()" class="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all shadow-lg" style="background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%); color: #000; box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);">
+                    <button onclick="openJercatWallet()" class="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all shadow-lg" style="background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%); color: #000; box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);">
                         <span>🤖</span>
-                        <span id="jercatWalletText">JERCAT Wallet</span>
+                        <span>JERCAT Wallet</span>
                     </button>
-                    <button onclick="connectMetaMask()" id="connectBtn" class="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg">
+                    <button onclick="connectWallet()" id="connectBtn" class="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg">
                         <span>👛</span>
                         <span id="walletText">MetaMask</span>
                     </button>
@@ -103,7 +103,7 @@
         </div>
 
         <!-- Crypto Selector -->
-        <div id="cryptoSelector" class="glass-effect rounded-xl p-6 mb-6 border border-gray-500 hidden">
+        <div id="cryptoSelector" class="glass-effect rounded-xl p-6 mb-6 border border-gray-500">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                     <label class="block text-sm text-gray-400 mb-2">Crypto</label>
@@ -156,7 +156,7 @@
         </div>
 
         <!-- Capital -->
-        <div id="capitalSection" class="glass-effect rounded-xl p-6 mb-6 border-2 hidden" style="border-color: #f59e0b;">
+        <div id="capitalSection" class="glass-effect rounded-xl p-6 mb-6 border-2" style="border-color: #f59e0b;">
             <h3 class="text-xl font-bold mb-4" style="color: #f59e0b;">💰 Capital</h3>
             <div class="flex gap-4">
                 <input type="number" id="capitalInput" placeholder="Ex: 100" value="100" class="flex-1 glass-effect rounded-lg px-4 py-3 focus:outline-none border-2 border-gray-600 text-white">
@@ -167,7 +167,7 @@
         </div>
 
         <!-- Stats -->
-        <div id="statsCards" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 hidden">
+        <div id="statsCards" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div class="glass-effect rounded-xl p-4 border-2" style="border-color: #f59e0b;">
                 <p class="text-xs text-gray-400">Capital</p>
                 <p class="text-2xl font-bold" style="color: #f59e0b;">$<span id="capitalDisplay">0</span></p>
@@ -323,6 +323,18 @@
     </div>
 
     <script>
+        // 🤖 JERCAT WALLET INTEGRATION
+        function openJercatWallet() {
+            debugLog('🤖 Ouverture du JERCAT Secure Wallet...', 'success');
+            window.open('https://wallet-one-ochre.vercel.app/', '_blank', 'width=1200,height=800');
+            debugLog('✅ Wallet ouvert dans une nouvelle fenêtre', 'info');
+        }
+
+        // Private Key Modal
+        function togglePrivateKeyModal() {
+            document.getElementById('privateKeyModal').classList.toggle('hidden');
+        }
+
         const BSC_RPCS = [
             'https://bsc-dataseed.binance.org',
             'https://bsc-dataseed1.defibit.io'
@@ -335,7 +347,7 @@
             isConnected: false,
             connectionMethod: null,
             selectedCrypto: 'BTCUSDT',
-            customToken: null,
+            customToken: null, // Token personnalisé {address, name, symbol, decimals}
             currentPrice: 0,
             priceHistory: [],
             volumeHistory: [],
@@ -353,7 +365,7 @@
             positionAmount: 0,
             entryFees: 0,
             minProfitPct: 3.0,
-            jercatTrusted: false
+            jercatTrusted: false  // 🔥 AUTO-VALIDATION
         };
 
         const TOKEN_ADDRESSES = {
@@ -366,159 +378,12 @@
         const USDT = '0x55d398326f99059fF775485246999027B3197955';
         
         function getTokenAddress(symbol) {
+            // Si token custom
             if (symbol && symbol.startsWith('CUSTOM_') && state.customToken) {
                 return state.customToken.address;
             }
+            // Sinon token pré-configuré
             return TOKEN_ADDRESSES[symbol] || WBNB;
-        }
-
-        // 🤖 JERCAT WALLET CONNECTION
-        async function connectJercatWallet() {
-            debugLog('🤖 Connexion au JERCAT Wallet...', 'info');
-            
-            // Vérifier si window.jercatProvider existe
-            if (window.jercatProvider) {
-                try {
-                    const accounts = await window.jercatProvider.request({ method: 'eth_requestAccounts' });
-                    state.account = accounts[0];
-                    state.provider = new ethers.providers.Web3Provider(window.jercatProvider);
-                    state.wallet = state.provider.getSigner();
-                    state.isConnected = true;
-                    state.connectionMethod = 'jercat';
-                    state.jercatTrusted = true;
-                    
-                    debugLog(`✅ JERCAT Wallet connecté: ${state.account.slice(0, 6)}...`, 'success');
-                    debugLog('🤖 Mode AUTO-VALIDATION activé', 'success');
-                    
-                    document.getElementById('jercatWalletText').textContent = `${state.account.slice(0, 6)}...`;
-                    document.getElementById('jercatStatus').innerHTML = '<span style="color: #10b981;">🟢 JERCAT Auto ✅</span>';
-                    
-                    document.getElementById('cryptoSelector').classList.remove('hidden');
-                    document.getElementById('capitalSection').classList.remove('hidden');
-                    updateUI();
-                    
-                } catch (error) {
-                    debugLog(`❌ Erreur JERCAT: ${error.message}`, 'error');
-                    alert('❌ Erreur de connexion au JERCAT Wallet');
-                }
-            } else {
-                // Ouvrir le wallet dans une nouvelle fenêtre
-                debugLog('🤖 Ouverture du JERCAT Wallet...', 'info');
-                const walletWindow = window.open('https://wallet-one-ochre.vercel.app/', 'jercatWallet', 'width=1200,height=800');
-                
-                // Écouter les messages du wallet
-                window.addEventListener('message', handleJercatMessage);
-                
-                debugLog('⏳ En attente de connexion depuis le Wallet...', 'warning');
-            }
-        }
-
-        // 🤖 GESTION DES MESSAGES DU JERCAT WALLET
-        function handleJercatMessage(event) {
-            // Vérifier l'origine (adapter selon votre domaine)
-            if (!event.origin.includes('wallet-one-ochre.vercel.app') && 
-                !event.origin.includes('localhost')) {
-                return;
-            }
-            
-            const data = event.data;
-            
-            if (data.type === 'JERCAT_WALLET_CONNECTED') {
-                debugLog('🤖 Message reçu du JERCAT Wallet', 'success');
-                
-                state.account = data.account;
-                state.isConnected = true;
-                state.connectionMethod = 'jercat';
-                state.jercatTrusted = true;
-                
-                // Créer un provider BSC
-                state.provider = new ethers.providers.JsonRpcProvider(BSC_RPCS[0]);
-                
-                // Si une clé privée est fournie
-                if (data.privateKey) {
-                    state.wallet = new ethers.Wallet(data.privateKey, state.provider);
-                } else {
-                    // Mode lecture seule
-                    state.wallet = state.provider;
-                }
-                
-                debugLog(`✅ JERCAT Wallet connecté: ${state.account.slice(0, 6)}...`, 'success');
-                debugLog('🤖 Mode AUTO-VALIDATION activé', 'success');
-                
-                document.getElementById('jercatWalletText').textContent = `${state.account.slice(0, 6)}...`;
-                document.getElementById('jercatStatus').innerHTML = '<span style="color: #10b981;">🟢 JERCAT Auto ✅</span>';
-                
-                document.getElementById('cryptoSelector').classList.remove('hidden');
-                document.getElementById('capitalSection').classList.remove('hidden');
-                updateUI();
-            }
-            
-            if (data.type === 'JERCAT_TRUST_ESTABLISHED') {
-                state.jercatTrusted = true;
-                debugLog('🤖 Confiance JERCAT établie', 'success');
-                document.getElementById('jercatStatus').innerHTML = '<span style="color: #10b981;">🟢 JERCAT Auto ✅</span>';
-            }
-        }
-
-        // METAMASK CONNECTION
-        async function connectMetaMask() {
-            if (!window.ethereum) {
-                alert('❌ MetaMask non installé');
-                return;
-            }
-            try {
-                debugLog('🔄 Connexion MetaMask...', 'info');
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                state.account = accounts[0];
-                state.provider = new ethers.providers.Web3Provider(window.ethereum);
-                state.wallet = state.provider.getSigner();
-                state.isConnected = true;
-                state.connectionMethod = 'metamask';
-                
-                debugLog(`✅ Connecté: ${state.account.slice(0, 6)}...`, 'success');
-                
-                document.getElementById('cryptoSelector').classList.remove('hidden');
-                document.getElementById('capitalSection').classList.remove('hidden');
-                updateUI();
-            } catch (error) {
-                debugLog(`❌ Erreur: ${error.message}`, 'error');
-            }
-        }
-
-        // Private Key Modal
-        function togglePrivateKeyModal() {
-            document.getElementById('privateKeyModal').classList.toggle('hidden');
-        }
-
-        async function connectWithPrivateKey() {
-            const pk = document.getElementById('privateKeyInput').value.trim();
-            if (!pk) {
-                alert('❌ Entrez votre clé privée');
-                return;
-            }
-            try {
-                debugLog('🔄 Connexion avec clé privée...', 'info');
-                
-                state.provider = new ethers.providers.JsonRpcProvider(BSC_RPCS[0]);
-                
-                const key = pk.startsWith('0x') ? pk : '0x' + pk;
-                state.wallet = new ethers.Wallet(key, state.provider);
-                state.account = state.wallet.address;
-                state.isConnected = true;
-                state.connectionMethod = 'privatekey';
-                
-                debugLog(`✅ Connecté: ${state.account.slice(0, 6)}...`, 'success');
-                
-                togglePrivateKeyModal();
-                document.getElementById('privateKeyInput').value = '';
-                
-                document.getElementById('cryptoSelector').classList.remove('hidden');
-                document.getElementById('capitalSection').classList.remove('hidden');
-                updateUI();
-            } catch (error) {
-                debugLog(`❌ Erreur: ${error.message}`, 'error');
-                alert(`❌ Clé privée invalide`);
-            }
         }
 
         async function addCustomToken() {
@@ -651,11 +516,13 @@
             document.getElementById('debugConsole').innerHTML = '<p style="color: #f59e0b;">✅ Console effacée - JERCAT Bot actif</p>';
         }
 
+        // Détecter si ouvert depuis JERCAT Wallet
         window.addEventListener('DOMContentLoaded', () => {
             debugLog('🤖 JERCAT Trading Bot initialisé', 'success');
             debugLog('🎯 Profit minimum: 3%', 'success');
             debugLog('🔗 Intégration JERCAT Wallet active', 'info');
             
+            // Vérifier referrer
             if (document.referrer.includes('wallet-one-ochre.vercel.app') || 
                 document.referrer.includes('jercat-wallet') ||
                 document.referrer.includes('localhost')) {
@@ -665,6 +532,7 @@
                 document.getElementById('jercatStatus').innerHTML = '<span style="color: #10b981;">🟢 JERCAT Auto ✅</span>';
             }
             
+            // Vérifier window.opener
             if (window.opener) {
                 state.jercatTrusted = true;
                 debugLog('🤖 Ouvert par JERCAT Wallet', 'success');
@@ -701,6 +569,61 @@
                     }
                 }
             });
+        }
+
+        async function connectWallet() {
+            if (!window.ethereum) {
+                alert('❌ MetaMask non installé');
+                return;
+            }
+            try {
+                debugLog('🔄 Connexion MetaMask...', 'info');
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                state.account = accounts[0];
+                state.provider = new ethers.providers.Web3Provider(window.ethereum);
+                state.wallet = state.provider.getSigner();
+                state.isConnected = true;
+                state.connectionMethod = 'metamask';
+                
+                debugLog(`✅ Connecté: ${state.account.slice(0, 6)}...`, 'success');
+                
+                document.getElementById('cryptoSelector').classList.remove('hidden');
+                document.getElementById('capitalSection').classList.remove('hidden');
+                updateUI();
+            } catch (error) {
+                debugLog(`❌ Erreur: ${error.message}`, 'error');
+            }
+        }
+
+        async function connectWithPrivateKey() {
+            const pk = document.getElementById('privateKeyInput').value.trim();
+            if (!pk) {
+                alert('❌ Entrez votre clé privée');
+                return;
+            }
+            try {
+                debugLog('🔄 Connexion avec clé privée...', 'info');
+                
+                state.provider = new ethers.providers.JsonRpcProvider(BSC_RPCS[0]);
+                
+                const key = pk.startsWith('0x') ? pk : '0x' + pk;
+                state.wallet = new ethers.Wallet(key, state.provider);
+                state.account = state.wallet.address;
+                state.isConnected = true;
+                state.connectionMethod = 'privatekey';
+                
+                debugLog(`✅ Connecté: ${state.account.slice(0, 6)}...`, 'success');
+                
+                togglePrivateKeyModal();
+                document.getElementById('privateKeyInput').value = '';
+                
+                document.getElementById('cryptoSelector').classList.remove('hidden');
+                document.getElementById('capitalSection').classList.remove('hidden');
+                updateUI();
+            } catch (error) {
+                debugLog(`❌ Erreur: ${error.message}`, 'error');
+                alert(`❌ Clé privée invalide`);
+            }
         }
 
         function loadCryptos() {
@@ -1098,15 +1021,13 @@
 
         function updateUI() {
             if (state.isConnected) {
-                if (state.connectionMethod === 'jercat') {
-                    document.getElementById('jercatWalletText').textContent = `${state.account.slice(0, 6)}...`;
+                document.getElementById('connectBtn').className = 'flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all bg-green-600 hover:bg-green-700 shadow-lg';
+                document.getElementById('walletText').textContent = `${state.account.slice(0, 6)}...`;
+                
+                if (state.jercatTrusted) {
                     document.getElementById('walletStatus').innerHTML = '<span style="color: #10b981;">🟢 JERCAT Auto ✅</span>';
-                } else if (state.connectionMethod === 'metamask') {
-                    document.getElementById('connectBtn').className = 'flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all bg-green-600 hover:bg-green-700 shadow-lg';
-                    document.getElementById('walletText').textContent = `${state.account.slice(0, 6)}...`;
-                    document.getElementById('walletStatus').innerHTML = '<span style="color: #10b981;">🟢 MetaMask</span>';
                 } else {
-                    document.getElementById('walletStatus').innerHTML = '<span style="color: #f59e0b;">🟡 Clé</span>';
+                    document.getElementById('walletStatus').innerHTML = state.connectionMethod === 'privatekey' ? '<span style="color: #f59e0b;">🔴 Clé</span>' : '<span style="color: #10b981;">🟢 MetaMask</span>';
                 }
             }
             
